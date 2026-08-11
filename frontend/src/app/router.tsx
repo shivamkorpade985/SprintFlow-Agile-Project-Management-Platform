@@ -2,13 +2,13 @@ import { createBrowserRouter } from "react-router";
 
 import AppLayout from "./layouts/AppLayout";
 
-import BoardPage from "../pages/BoardPage";
-import ProjectOverviewPage from "../pages/ProjectOverviewPage";
-import ProjectsPage from "../pages/ProjectsPage";
-import StoriesPage from "../pages/StoriesPage";
-import StoryDetailPage from "../pages/StoryDetailPage";
-import TeamPage from "../pages/TeamPage";
-import UserDetailPage from "../pages/UserDetailPage";
+import BoardPage from "../features/board/components/BoardPage";
+import ProjectOverviewPage from "../features/projects/components/ProjectOverviewPage";
+import ProjectsPage from "../features/projects/components/ProjectsPage";
+import StoriesPage from "../features/stories/components/StoriesPage";
+import StoryDetailPage from "../features/stories/components/StoryDetailPage";
+import TeamPage from "../features/team/components/TeamPage";
+import UserDetailPage from "../features/team/components/UserDetailPage";
 
 export const router = createBrowserRouter([
   {

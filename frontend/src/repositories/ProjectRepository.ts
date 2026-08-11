@@ -1,8 +1,8 @@
-import type { Project } from "../types/project";
+import type { Project } from "../features/projects/types/project";
 import type {
   CreateProjectRequest,
   UpdateProjectRequest,
-} from "../types/contracts/project";
+} from "../features/projects/types/contracts/project";
 
 export interface ProjectRepository {
   getProjects(): Promise<Project[]>;

@@ -1,16 +1,24 @@
-//Here context definitions are 
-
 import { createContext } from "react";
-import type { Project } from "../../../types/project";
-import type { CreateProjectRequest } from "../../../types/contracts/project";
+import type { CreateProjectRequest, UpdateProjectRequest } from "../types/contracts/project";
+import type { Project } from "../types/project";
 
 export interface ProjectsContextValue {
   projects: Project[];
   isLoading: boolean;
   error: string | null;
-  refreshProjects: () => Promise<void>;
-  createProject: (data: CreateProjectRequest) => Promise<Project>;
 
+  refreshProjects: () => Promise<void>;
+
+  createProject: (
+    data: CreateProjectRequest,
+  ) => Promise<Project>;
+
+  updateProject: (
+    id: string,
+    data: UpdateProjectRequest,
+  ) => Promise<Project>;
+
+  deleteProject: (id: string) => Promise<void>;
 }
 
 export const ProjectsContext =

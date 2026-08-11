@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import CreateProjectDialog from "../features/projects/components/CreateProjectDialog";
-import { useProjects } from "../features/projects/hooks/useProjects";
+import CreateProjectDialog from "./CreateProjectDialog";
+import { useProjects } from "../hooks/useProjects";
 import { useNavigate } from "react-router";
 
 function ProjectsPage() {

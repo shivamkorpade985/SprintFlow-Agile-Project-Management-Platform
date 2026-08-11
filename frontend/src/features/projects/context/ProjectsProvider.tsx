@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Project } from "../../../types/project";
-import type { CreateProjectRequest } from "../../../types/contracts/project";
+import type { Project } from "../types/project";
+import type {
+  CreateProjectRequest,
+  UpdateProjectRequest,
+} from "../types/contracts/project";
+
 import { projectRepository } from "../projectRepository";
 import { ProjectsContext } from "./projectsContext";
 
@@ -52,6 +56,50 @@ export function ProjectsProvider({
   [],
 );
 
+    const updateProject = useCallback(
+    async (
+      id: string,
+      data: UpdateProjectRequest,
+    ): Promise<Project> => {
+      try {
+        setError(null);
+
+        const updatedProject =
+          await projectRepository.updateProject(id, data);
+
+        setProjects((currentProjects) =>
+          currentProjects.map((project) =>
+            project.id === id ? updatedProject : project,
+          ),
+        );
+
+        return updatedProject;
+      } catch {
+        setError("Failed to update project.");
+        throw new Error("Failed to update project.");
+      }
+    },
+    [],
+  );
+
+  const deleteProject = useCallback(
+    async (id: string): Promise<void> => {
+      try {
+        setError(null);
+
+        await projectRepository.deleteProject(id);
+
+        setProjects((currentProjects) =>
+          currentProjects.filter((project) => project.id !== id),
+        );
+      } catch {
+        setError("Failed to delete project.");
+        throw new Error("Failed to delete project.");
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     let isMounted = true;
 
@@ -83,11 +131,13 @@ export function ProjectsProvider({
   return (
     <ProjectsContext.Provider
       value={{
-        projects,
-        isLoading,
-        error,
-        refreshProjects,
-        createProject,
+      projects,
+      isLoading,
+      error,
+      refreshProjects,
+      createProject,
+      updateProject,
+      deleteProject,
 }}
     >
       {children}

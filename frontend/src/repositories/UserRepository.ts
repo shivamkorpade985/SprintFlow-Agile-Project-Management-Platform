@@ -1,8 +1,8 @@
-import type { User } from "../types/user";
+import type { User } from "../features/team/types/user";
 import type {
   CreateUserRequest,
   UpdateUserRequest,
-} from "../types/contracts/user";
+} from "../features/team/types/contracts/user";
 
 export interface UserRepository {
   getUsers(): Promise<User[]>;
