@@ -15,6 +15,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 
 import { theme } from "../theme/theme";
+import { ProjectsProvider } from "../../features/projects/context/ProjectsProvider";
 
 const drawerWidth = 240;
 
@@ -41,6 +42,7 @@ function AppLayout() {
   };
 
   return (
+    <ProjectsProvider>
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <AppBar
         position="fixed"
@@ -113,6 +115,7 @@ function AppLayout() {
         </Box>
       </Box>
     </Box>
+     </ProjectsProvider>
   );
 }
 
