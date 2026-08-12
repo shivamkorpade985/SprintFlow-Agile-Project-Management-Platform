@@ -5,14 +5,9 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import {
-  ArrowBack,
-} from "@mui/icons-material";
-import {
-  useNavigate,
-  useParams,
-} from "react-router";
+import { useEffect, useState } from "react";
+import { ArrowBack } from "@mui/icons-material";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 
 import { LocalStorageUserRepository } from "../../../repositories/local/LocalStorageUserRepository";
 import type { User } from "../../team/types/user";
@@ -24,70 +19,66 @@ import type { UserStory } from "../types/story";
 import CreateStoryDialog from "./CreateStoryDialog";
 import EditStoryDialog from "./EditStoryDialog";
 import StoryCard from "./StoryCard";
+import StoryFilters from "./StoryFilters";
 
-const userRepository =
-  new LocalStorageUserRepository();
+const userRepository = new LocalStorageUserRepository();
 
 interface StoriesContentProps {
   projectId: string;
 }
 
-function StoriesContent({
-  projectId,
-}: StoriesContentProps) {
+function StoriesContent({ projectId }: StoriesContentProps) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const {
-    stories,
-    isLoading,
-    error,
-    deleteStory,
-  } = useStories();
+  const { stories, isLoading, error, deleteStory } = useStories();
 
-  const [
-    isCreateDialogOpen,
-    setIsCreateDialogOpen,
-  ] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [editingStory, setEditingStory] = useState<UserStory | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [userLoadError, setUserLoadError] = useState<string | null>(null);
 
-  const [editingStory, setEditingStory] =
-    useState<UserStory | null>(null);
+  // Load team users on mount so filters & cards have assignee identities
+  useEffect(() => {
+    let isMounted = true;
 
-  const [users, setUsers] =
-    useState<User[]>([]);
-
-  const [isLoadingUsers, setIsLoadingUsers] =
-    useState(false);
-
-  const [userLoadError, setUserLoadError] =
-    useState<string | null>(null);
-
-  const handleOpenCreateDialog =
-    async () => {
+    const loadUsers = async () => {
       try {
-        setIsLoadingUsers(true);
-        setUserLoadError(null);
-
-        const data =
-          await userRepository.getUsers();
-
-        setUsers(data);
-        setIsCreateDialogOpen(true);
+        const data = await userRepository.getUsers();
+        if (isMounted) {
+          setUsers(data);
+        }
       } catch {
-        setUserLoadError(
-          "Failed to load team members.",
-        );
-      } finally {
-        setIsLoadingUsers(false);
+        if (isMounted) {
+          setUserLoadError("Failed to load team members.");
+        }
       }
     };
 
-  const handleDeleteStory = async (
-    story: UserStory,
-  ) => {
-    const confirmed = window.confirm(
-      `Delete "${story.title}"?`,
-    );
+    void loadUsers();
 
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleOpenCreateDialog = async () => {
+    try {
+      setIsLoadingUsers(true);
+      setUserLoadError(null);
+      const data = await userRepository.getUsers();
+      setUsers(data);
+      setIsCreateDialogOpen(true);
+    } catch {
+      setUserLoadError("Failed to load team members.");
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  const handleDeleteStory = async (story: UserStory) => {
+    const confirmed = window.confirm(`Delete "${story.title}"?`);
     if (!confirmed) {
       return;
     }
@@ -99,36 +90,61 @@ function StoriesContent({
     }
   };
 
+  // URL query parameter filters derivation
+  const searchParam = searchParams.get("search") || "";
+  const assigneeParam = searchParams.get("assignee") || "ALL";
+  const priorityParam = searchParams.get("priority") || "ALL";
+  const myTasksParam = searchParams.get("myTasks") === "true";
+
+  const filteredStories = stories.filter((story) => {
+    // 1. Title Search (case-insensitive)
+    if (searchParam) {
+      const term = searchParam.toLowerCase();
+      if (!story.title.toLowerCase().includes(term)) {
+        return false;
+      }
+    }
+
+    // 2. Assignee Filter
+    if (assigneeParam && assigneeParam !== "ALL") {
+      if (assigneeParam === "UNASSIGNED") {
+        if (story.assignedUserId) return false;
+      } else {
+        if (story.assignedUserId !== assigneeParam) return false;
+      }
+    }
+
+    // 3. Priority Filter
+    if (priorityParam && priorityParam !== "ALL") {
+      if (story.priority !== priorityParam) return false;
+    }
+
+    // 4. My Tasks Filter (Requires authenticated user session)
+    if (myTasksParam) {
+      return false;
+    }
+
+    return true;
+  });
+
   if (isLoading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          py: 8,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />
       </Box>
     );
   }
 
   if (error) {
-    return (
-      <Alert severity="error">
-        {error}
-      </Alert>
-    );
+    return <Alert severity="error">{error}</Alert>;
   }
 
   return (
     <Box>
-      {/* Back to Project */}
+      {/* Back to Project Navigation */}
       <Button
         startIcon={<ArrowBack />}
-        onClick={() =>
-          navigate(`/projects/${projectId}`)
-        }
+        onClick={() => navigate(`/projects/${projectId}`)}
         sx={{ mb: 3 }}
       >
         Back to Project
@@ -143,39 +159,54 @@ function StoriesContent({
           mb: 3,
         }}
       >
-        <Typography
-          variant="h4"
-          component="h1"
-        >
+        <Typography variant="h4" component="h1">
           Stories
         </Typography>
 
         <Button
           variant="contained"
-          onClick={() =>
-            void handleOpenCreateDialog()
-          }
+          onClick={() => void handleOpenCreateDialog()}
           loading={isLoadingUsers}
         >
           Create Story
         </Button>
       </Box>
 
-      {/* User loading error */}
+      {/* User loading error alert */}
       {userLoadError && (
-        <Alert
-          severity="error"
-          sx={{ mb: 3 }}
-        >
+        <Alert severity="error" sx={{ mb: 3 }}>
           {userLoadError}
         </Alert>
       )}
 
-      {/* Story Content */}
+      {/* Filter Toolbar */}
+      {stories.length > 0 && (
+        <StoryFilters
+          users={users}
+          totalStoriesCount={stories.length}
+          filteredStoriesCount={filteredStories.length}
+        />
+      )}
+
+      {/* Stories List Content / Empty States */}
       {stories.length === 0 ? (
         <Alert severity="info">
-          No stories found. Create your first
-          story to get started.
+          No stories found. Create your first story to get started.
+        </Alert>
+      ) : filteredStories.length === 0 ? (
+        <Alert
+          severity="info"
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => setSearchParams({}, { replace: true })}
+            >
+              Clear Filters
+            </Button>
+          }
+        >
+          No stories match your current filters.
         </Alert>
       ) : (
         <Box
@@ -185,10 +216,9 @@ function StoriesContent({
             gap: 2,
           }}
         >
-          {stories.map((story) => {
+          {filteredStories.map((story) => {
             const assignee = users.find(
-              (user) =>
-                user.id === story.assignedUserId,
+              (user) => user.id === story.assignedUserId,
             );
 
             return (
@@ -197,13 +227,9 @@ function StoriesContent({
                 story={story}
                 projectId={projectId}
                 assignee={assignee}
-                onEdit={(selectedStory) =>
-                  setEditingStory(selectedStory)
-                }
+                onEdit={(selectedStory) => setEditingStory(selectedStory)}
                 onDelete={(selectedStory) =>
-                  void handleDeleteStory(
-                    selectedStory,
-                  )
+                  void handleDeleteStory(selectedStory)
                 }
               />
             );
@@ -216,9 +242,7 @@ function StoriesContent({
         open={isCreateDialogOpen}
         projectId={projectId}
         users={users}
-        onClose={() =>
-          setIsCreateDialogOpen(false)
-        }
+        onClose={() => setIsCreateDialogOpen(false)}
       />
 
       {/* Edit Story Dialog */}
@@ -226,33 +250,24 @@ function StoriesContent({
         open={editingStory !== null}
         story={editingStory}
         users={users}
-        onClose={() =>
-          setEditingStory(null)
-        }
+        onClose={() => setEditingStory(null)}
       />
     </Box>
   );
 }
 
 function StoriesPage() {
-  const { projectId } =
-    useParams<{
-      projectId: string;
-    }>();
+  const { projectId } = useParams<{
+    projectId: string;
+  }>();
 
   if (!projectId) {
-    return (
-      <Typography color="error">
-        Project ID is missing.
-      </Typography>
-    );
+    return <Typography color="error">Project ID is missing.</Typography>;
   }
 
   return (
     <StoriesProvider projectId={projectId}>
-      <StoriesContent
-        projectId={projectId}
-      />
+      <StoriesContent projectId={projectId} />
     </StoriesProvider>
   );
 }
