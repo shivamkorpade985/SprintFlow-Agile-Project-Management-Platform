@@ -1,8 +1,10 @@
 import { createBrowserRouter } from "react-router";
 
 import AppLayout from "./layouts/AppLayout";
+import LandingLayout from "./layouts/LandingLayout";
 
 import BoardPage from "../features/board/components/BoardPage";
+import LandingPage from "../features/landing/components/LandingPage";
 import ProjectOverviewPage from "../features/projects/components/ProjectOverviewPage";
 import ProjectsPage from "../features/projects/components/ProjectsPage";
 import StoriesPage from "../features/stories/components/StoriesPage";
@@ -13,34 +15,44 @@ import UserDetailPage from "../features/team/components/UserDetailPage";
 export const router = createBrowserRouter([
   {
     path: "/",
+    Component: LandingLayout,
+    children: [
+      {
+        index: true,
+        Component: LandingPage,
+      },
+    ],
+  },
+  {
+    path: "/projects",
     Component: AppLayout,
     children: [
       {
-        path: "projects",
+        index: true,
         Component: ProjectsPage,
       },
       {
-        path: "projects/:projectId",
+        path: ":projectId",
         Component: ProjectOverviewPage,
       },
       {
-        path: "projects/:projectId/board",
+        path: ":projectId/board",
         Component: BoardPage,
       },
       {
-        path: "projects/:projectId/stories",
+        path: ":projectId/stories",
         Component: StoriesPage,
       },
       {
-        path: "projects/:projectId/stories/:storyId",
+        path: ":projectId/stories/:storyId",
         Component: StoryDetailPage,
       },
       {
-        path: "projects/:projectId/team",
+        path: ":projectId/team",
         Component: TeamPage,
       },
       {
-        path: "projects/:projectId/team/:userId",
+        path: ":projectId/team/:userId",
         Component: UserDetailPage,
       },
     ],
