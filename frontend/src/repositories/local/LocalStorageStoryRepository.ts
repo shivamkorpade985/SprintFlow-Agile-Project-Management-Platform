@@ -1,25 +1,42 @@
-import type { UserStory } from "../../types/story";
+import type { UserStory } from "../../features/stories/types/story";
 import type {
   CreateStoryRequest,
   UpdateStoryRequest,
-} from "../../types/contracts/story";
+} from "../../features/stories/types/contracts/story";
 import { STORAGE_KEYS } from "../../constants/storageKeys";
 import { getItem, setItem } from "../../storage/localStorage";
 import type { StoryRepository } from "../StoryRepository";
 
-export class LocalStorageStoryRepository implements StoryRepository {
-  async getStories(): Promise<UserStory[]> {
-    return getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
+export class LocalStorageStoryRepository
+  implements StoryRepository
+{
+  async getStoriesByProject(
+    projectId: string,
+  ): Promise<UserStory[]> {
+    const stories =
+      getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
+
+    return stories.filter(
+      (story) => story.projectId === projectId,
+    );
   }
 
-  async getStoryById(id: string): Promise<UserStory | null> {
-    const stories = await this.getStories();
+  async getStoryById(
+    id: string,
+  ): Promise<UserStory | null> {
+    const stories =
+      getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
 
-    return stories.find((story) => story.id === id) ?? null;
+    return (
+      stories.find((story) => story.id === id) ?? null
+    );
   }
 
-  async createStory(data: CreateStoryRequest): Promise<UserStory> {
-    const stories = await this.getStories();
+  async createStory(
+    data: CreateStoryRequest,
+  ): Promise<UserStory> {
+    const stories =
+      getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
 
     const story: UserStory = {
       id: crypto.randomUUID(),
@@ -27,7 +44,10 @@ export class LocalStorageStoryRepository implements StoryRepository {
       ...data,
     };
 
-    setItem(STORAGE_KEYS.STORIES, [...stories, story]);
+    setItem(
+      STORAGE_KEYS.STORIES,
+      [...stories, story],
+    );
 
     return story;
   }
@@ -36,9 +56,12 @@ export class LocalStorageStoryRepository implements StoryRepository {
     id: string,
     data: UpdateStoryRequest,
   ): Promise<UserStory> {
-    const stories = await this.getStories();
+    const stories =
+      getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
 
-    const existingStory = stories.find((story) => story.id === id);
+    const existingStory = stories.find(
+      (story) => story.id === id,
+    );
 
     if (!existingStory) {
       throw new Error("Story not found");
@@ -60,7 +83,8 @@ export class LocalStorageStoryRepository implements StoryRepository {
   }
 
   async deleteStory(id: string): Promise<void> {
-    const stories = await this.getStories();
+    const stories =
+      getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
 
     setItem(
       STORAGE_KEYS.STORIES,

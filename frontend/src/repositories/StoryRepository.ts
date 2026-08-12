@@ -1,11 +1,11 @@
-import type { UserStory } from "../types/story";
+import type { UserStory } from "../features/stories/types/story";
 import type {
   CreateStoryRequest,
   UpdateStoryRequest,
-} from "../types/contracts/story";
+} from "../features/stories/types/contracts/story";
 
 export interface StoryRepository {
-  getStories(): Promise<UserStory[]>;
+  getStoriesByProject(projectId: string): Promise<UserStory[]>;  
   getStoryById(id: string): Promise<UserStory | null>;
   createStory(data: CreateStoryRequest): Promise<UserStory>;
   updateStory(id: string, data: UpdateStoryRequest): Promise<UserStory>;

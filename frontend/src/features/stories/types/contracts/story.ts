@@ -1,6 +1,7 @@
 import type { StoryPriority, StoryStatus } from "../story";
 
 export interface CreateStoryRequest {
+  projectId: string;
   title: string;
   description: string;
   priority: StoryPriority;
@@ -8,6 +9,7 @@ export interface CreateStoryRequest {
   assignedUserId?: string;
   status: StoryStatus;
 }
+
 
 export interface UpdateStoryRequest {
   title: string;

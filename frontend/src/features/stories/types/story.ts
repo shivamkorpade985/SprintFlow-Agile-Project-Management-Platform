@@ -1,4 +1,7 @@
-export type StoryPriority = "LOW" | "MEDIUM" | "HIGH";
+export type StoryPriority =
+  | "LOW"
+  | "MEDIUM"
+  | "HIGH";
 
 export type StoryStatus =
   | "BACKLOG"
@@ -6,8 +9,9 @@ export type StoryStatus =
   | "TESTING"
   | "DONE";
 
-  export interface UserStory {
+export interface UserStory {
   id: string;
+  projectId: string;
   title: string;
   description: string;
   priority: StoryPriority;
