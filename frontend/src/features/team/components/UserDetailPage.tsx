@@ -5,10 +5,17 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   Divider,
+  Grid,
+  Paper,
+  Stack,
   Typography,
 } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BadgeIcon from "@mui/icons-material/Badge";
+import PersonIcon from "@mui/icons-material/Person";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -67,23 +74,18 @@ function UserDetailPage() {
     };
   }, [userId]);
 
+  const handleBackToTeam = () => {
+    navigate(projectId ? `/projects/${projectId}/team` : "/projects");
+  };
+
   if (!userId) {
     return (
-      <Box>
+      <Box sx={{ maxWidth: 800, mx: "auto" }}>
         <Alert severity="error" sx={{ mb: 2 }}>
           User ID is missing.
         </Alert>
 
-        <Button
-          variant="outlined"
-          onClick={() =>
-            navigate(
-              projectId
-                ? `/projects/${projectId}/team`
-                : "/projects",
-            )
-          }
-        >
+        <Button variant="outlined" onClick={handleBackToTeam}>
           Back to Team
         </Button>
       </Box>
@@ -92,13 +94,7 @@ function UserDetailPage() {
 
   if (isLoading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          py: 8,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
         <CircularProgress />
       </Box>
     );
@@ -106,21 +102,12 @@ function UserDetailPage() {
 
   if (error || !user) {
     return (
-      <Box>
+      <Box sx={{ maxWidth: 800, mx: "auto" }}>
         <Alert severity="error" sx={{ mb: 2 }}>
           {error ?? "User not found."}
         </Alert>
 
-        <Button
-          variant="outlined"
-          onClick={() =>
-            navigate(
-              projectId
-                ? `/projects/${projectId}/team`
-                : "/projects",
-            )
-          }
-        >
+        <Button variant="outlined" onClick={handleBackToTeam}>
           Back to Team
         </Button>
       </Box>
@@ -128,75 +115,86 @@ function UserDetailPage() {
   }
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 800, mx: "auto" }}>
+      {/* Navigation Back Link */}
       <Button
-        variant="text"
-        onClick={() =>
-          navigate(
-            projectId
-              ? `/projects/${projectId}/team`
-              : "/projects",
-          )
-        }
-        sx={{ mb: 2 }}
-      >
-        ← Back to Team
-      </Button>
-
-      <Typography
-        variant="h4"
-        component="h1"
+        startIcon={<ArrowBackIcon />}
+        onClick={handleBackToTeam}
         sx={{ mb: 3 }}
       >
-        User Details
-      </Typography>
+        Back to Team
+      </Button>
 
-      <Card sx={{ maxWidth: 600 }}>
-        <CardContent>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              mb: 3,
-            }}
-          >
+      {/* User Details Card Container */}
+      <Card variant="outlined" sx={{ p: 1 }}>
+        <CardContent sx={{ p: 3 }}>
+          {/* User Profile Header */}
+          <Stack direction="row" spacing={3} sx={{ alignItems: "center", mb: 3 }}>
             <Avatar
               src={user.avatar}
               sx={{
-                width: 64,
-                height: 64,
+                width: 72,
+                height: 72,
+                bgcolor: "primary.main",
+                fontSize: "1.75rem",
+                fontWeight: 700,
+                boxShadow: 2,
               }}
             >
               {user.name.charAt(0).toUpperCase()}
             </Avatar>
 
             <Box>
-              <Typography variant="h5">
+              <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
                 {user.name}
               </Typography>
 
-              <Typography
-                variant="body1"
-                color="text.secondary"
-              >
-                {user.role}
-              </Typography>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 1 }}>
+                <Chip
+                  icon={<PersonIcon fontSize="small" />}
+                  label={user.role}
+                  color="primary"
+                  size="small"
+                  sx={{ fontWeight: 600 }}
+                />
+              </Stack>
             </Box>
-          </Box>
+          </Stack>
 
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ my: 3 }} />
 
-          <Typography
-            variant="body2"
-            color="text.secondary"
-          >
-            User ID
+          {/* User Metadata Grid */}
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2, fontWeight: 700, letterSpacing: 0.5 }}>
+            USER INFORMATION
           </Typography>
 
-          <Typography variant="body1">
-            {user.id}
-          </Typography>
+          <Paper variant="outlined" sx={{ p: 2, bgcolor: "#FAFAFA" }}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  SYSTEM USER ID
+                </Typography>
+
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 0.5 }}>
+                  <BadgeIcon fontSize="small" color="action" />
+
+                  <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
+                    {user.id}
+                  </Typography>
+                </Stack>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  ASSIGNED ROLE
+                </Typography>
+
+                <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 600 }}>
+                  {user.role}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
         </CardContent>
       </Card>
     </Box>

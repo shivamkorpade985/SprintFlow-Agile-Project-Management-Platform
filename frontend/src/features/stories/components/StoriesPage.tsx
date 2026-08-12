@@ -5,8 +5,9 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useEffect, useState } from "react";
-import { ArrowBack } from "@mui/icons-material";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 
 import { LocalStorageUserRepository } from "../../../repositories/local/LocalStorageUserRepository";
@@ -129,7 +130,7 @@ function StoriesContent({ projectId }: StoriesContentProps) {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
         <CircularProgress />
       </Box>
     );
@@ -140,10 +141,10 @@ function StoriesContent({ projectId }: StoriesContentProps) {
   }
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 1200, mx: "auto" }}>
       {/* Back to Project Navigation */}
       <Button
-        startIcon={<ArrowBack />}
+        startIcon={<ArrowBackIcon />}
         onClick={() => navigate(`/projects/${projectId}`)}
         sx={{ mb: 3 }}
       >
@@ -155,18 +156,29 @@ function StoriesContent({ projectId }: StoriesContentProps) {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
+          alignItems: "flex-start",
+          gap: 2,
+          mb: 4,
+          flexWrap: "wrap",
         }}
       >
-        <Typography variant="h4" component="h1">
-          Stories
-        </Typography>
+        <Box>
+          <Typography variant="h4" component="h1">
+            User Stories
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+            Create, filter, and prioritize backlog work items for your sprint.
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
+          startIcon={<AddIcon />}
           onClick={() => void handleOpenCreateDialog()}
           loading={isLoadingUsers}
+          disableElevation
+          sx={{ px: 2.5, py: 1 }}
         >
           Create Story
         </Button>
@@ -190,17 +202,19 @@ function StoriesContent({ projectId }: StoriesContentProps) {
 
       {/* Stories List Content / Empty States */}
       {stories.length === 0 ? (
-        <Alert severity="info">
-          No stories found. Create your first story to get started.
+        <Alert severity="info" sx={{ borderRadius: 2 }}>
+          No stories found. Create your first user story to get started.
         </Alert>
       ) : filteredStories.length === 0 ? (
         <Alert
           severity="info"
+          sx={{ borderRadius: 2 }}
           action={
             <Button
               color="inherit"
               size="small"
               onClick={() => setSearchParams({}, { replace: true })}
+              sx={{ fontWeight: 600 }}
             >
               Clear Filters
             </Button>

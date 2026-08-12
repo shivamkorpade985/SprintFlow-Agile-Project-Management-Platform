@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -33,7 +35,7 @@ const STATUS_OPTIONS: { value: StoryStatus; label: string }[] = [
 
 const getPriorityColor = (
   priority: StoryPriority,
-): "default" | "info" | "warning" | "error" => {
+): "error" | "warning" | "info" | "default" => {
   switch (priority) {
     case "HIGH":
       return "error";
@@ -81,32 +83,34 @@ function KanbanCard({
       variant="outlined"
       sx={{
         mb: 2,
-        boxShadow: 1,
-        transition: "box-shadow 0.2s ease-in-out",
+        bgcolor: "background.paper",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
         "&:hover": {
-          boxShadow: 3,
+          transform: "translateY(-2px)",
+          boxShadow: "0 6px 12px -2px rgba(0, 0, 0, 0.08)",
         },
       }}
     >
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+        {/* Story Title */}
         <Typography
           variant="subtitle1"
           component="h3"
           sx={{
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: "pointer",
+            lineHeight: 1.3,
             "&:hover": {
-              textDecoration: "underline",
               color: "primary.main",
+              textDecoration: "underline",
             },
           }}
-          onClick={() =>
-            navigate(`/projects/${projectId}/stories/${story.id}`)
-          }
+          onClick={() => navigate(`/projects/${projectId}/stories/${story.id}`)}
         >
           {story.title}
         </Typography>
 
+        {/* Story Description */}
         {story.description && (
           <Typography
             variant="body2"
@@ -119,41 +123,61 @@ function KanbanCard({
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              fontSize: "0.8125rem",
+              lineHeight: 1.4,
             }}
           >
             {story.description}
           </Typography>
         )}
 
+        {/* Badges Stack */}
         <Stack
           direction="row"
           spacing={1}
-          useFlexGap
-          sx={{ mb: 2, flexWrap: "wrap", gap: 0.5 }}
+          sx={{ mb: 2, flexWrap: "wrap", gap: 0.5, alignItems: "center" }}
         >
           <Chip
             label={story.priority}
             size="small"
             color={getPriorityColor(story.priority)}
             variant="outlined"
+            sx={{ height: 20, fontSize: "0.65rem", fontWeight: 700 }}
           />
 
           <Chip
             label={`${story.storyPoints} pts`}
             size="small"
             variant="outlined"
+            sx={{ height: 20, fontSize: "0.65rem", fontWeight: 600 }}
           />
 
-          <Chip
-            label={assignee ? assignee.name : "Unassigned"}
-            size="small"
-            color={assignee ? "primary" : "default"}
-            variant="outlined"
-          />
+          {assignee ? (
+            <Chip
+              avatar={
+                <Avatar sx={{ width: 16, height: 16, fontSize: "0.6rem", bgcolor: "primary.main" }}>
+                  {assignee.name.charAt(0).toUpperCase()}
+                </Avatar>
+              }
+              label={assignee.name}
+              size="small"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "0.65rem", fontWeight: 600 }}
+            />
+          ) : (
+            <Chip
+              icon={<PersonIcon fontSize="small" />}
+              label="Unassigned"
+              size="small"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "0.65rem", fontWeight: 500 }}
+            />
+          )}
         </Stack>
 
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="caption" color="text.secondary">
+        {/* Status Dropdown */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
             Status
           </Typography>
 
@@ -162,10 +186,10 @@ function KanbanCard({
               value={story.status}
               onChange={(e) => void handleStatusSelect(e)}
               disabled={isUpdating}
-              sx={{ fontSize: "0.8125rem", height: 32 }}
+              sx={{ fontSize: "0.75rem", height: 30, borderRadius: 1.5 }}
             >
               {STATUS_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value} sx={{ fontSize: "0.8125rem" }}>
+                <MenuItem key={option.value} value={option.value} sx={{ fontSize: "0.75rem" }}>
                   {option.label}
                 </MenuItem>
               ))}

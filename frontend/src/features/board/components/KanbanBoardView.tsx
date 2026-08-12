@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Grid,
   Paper,
+  Stack,
   Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -24,14 +25,15 @@ interface KanbanBoardViewProps {
 interface ColumnDefinition {
   status: StoryStatus;
   title: string;
-  color: string;
+  accentColor: string;
+  bgColor: string;
 }
 
 const KANBAN_COLUMNS: ColumnDefinition[] = [
-  { status: "BACKLOG", title: "Backlog", color: "#e0e0e0" },
-  { status: "IN_PROGRESS", title: "In Progress", color: "#bbdefb" },
-  { status: "TESTING", title: "Testing", color: "#fff9c4" },
-  { status: "DONE", title: "Done", color: "#c8e6c9" },
+  { status: "BACKLOG", title: "Backlog", accentColor: "#64748B", bgColor: "#F8FAFC" },
+  { status: "IN_PROGRESS", title: "In Progress", accentColor: "#1E64D4", bgColor: "#F0F7FF" },
+  { status: "TESTING", title: "Testing", accentColor: "#D97706", bgColor: "#FFFDF0" },
+  { status: "DONE", title: "Done", accentColor: "#16A34A", bgColor: "#F0FDF4" },
 ];
 
 function KanbanBoardView({ projectId }: KanbanBoardViewProps) {
@@ -48,7 +50,7 @@ function KanbanBoardView({ projectId }: KanbanBoardViewProps) {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
         <CircularProgress />
       </Box>
     );
@@ -59,7 +61,8 @@ function KanbanBoardView({ projectId }: KanbanBoardViewProps) {
   }
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 1400, mx: "auto" }}>
+      {/* Navigation Back Link */}
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate(`/projects/${projectId}`)}
@@ -68,13 +71,21 @@ function KanbanBoardView({ projectId }: KanbanBoardViewProps) {
         Back to Project
       </Button>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          Kanban Board
-        </Typography>
+      {/* Page Header */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
+        <Box>
+          <Typography variant="h4" component="h1">
+            Kanban Board
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+            Visualize workflow stages and track story progression in real time.
+          </Typography>
+        </Box>
       </Box>
 
-      <Grid container spacing={2}>
+      {/* Kanban Columns Grid */}
+      <Grid container spacing={2.5}>
         {KANBAN_COLUMNS.map((column) => {
           const columnStories = stories.filter(
             (story) => story.status === column.status,
@@ -86,47 +97,57 @@ function KanbanBoardView({ projectId }: KanbanBoardViewProps) {
                 variant="outlined"
                 sx={{
                   p: 2,
-                  backgroundColor: "#f8f9fa",
-                  minHeight: 500,
+                  bgcolor: column.bgColor,
+                  minHeight: 560,
                   display: "flex",
                   flexDirection: "column",
+                  borderTop: 4,
+                  borderTopColor: column.accentColor,
+                  borderRadius: 3,
                 }}
               >
-                <Box
+                {/* Column Header */}
+                <Stack
+                  direction="row"
                   sx={{
-                    display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     mb: 2,
-                    pb: 1,
-                    borderBottom: 2,
-                    borderColor: column.color,
+                    pb: 1.5,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
                   }}
                 >
-                  <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+                  <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 700, color: "text.primary" }}>
                     {column.title}
                   </Typography>
 
                   <Chip
                     label={columnStories.length}
                     size="small"
-                    color="default"
-                    sx={{ fontWeight: "bold" }}
+                    sx={{
+                      fontWeight: 700,
+                      bgcolor: "background.paper",
+                      border: "1px solid",
+                      borderColor: "divider",
+                    }}
                   />
-                </Box>
+                </Stack>
 
+                {/* Column Story Items Container */}
                 <Box sx={{ flexGrow: 1 }}>
                   {columnStories.length === 0 ? (
                     <Box
                       sx={{
-                        p: 2,
+                        p: 3,
                         textAlign: "center",
-                        backgroundColor: "#ffffff",
-                        borderRadius: 1,
-                        border: "1px dashed #bdbdbd",
+                        bgcolor: "background.paper",
+                        borderRadius: 2,
+                        border: "1px dashed #CBD5E1",
+                        mt: 1,
                       }}
                     >
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                         No stories in {column.title.toLowerCase()}
                       </Typography>
                     </Box>

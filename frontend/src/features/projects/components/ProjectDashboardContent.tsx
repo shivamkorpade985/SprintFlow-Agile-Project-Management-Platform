@@ -26,6 +26,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import PeopleIcon from "@mui/icons-material/People";
 import SpeedIcon from "@mui/icons-material/Speed";
@@ -45,7 +47,7 @@ interface ProjectDashboardContentProps {
 
 const getPriorityColor = (
   priority: StoryPriority,
-): "default" | "info" | "warning" | "error" => {
+): "error" | "warning" | "info" | "default" => {
   switch (priority) {
     case "HIGH":
       return "error";
@@ -60,7 +62,7 @@ const getPriorityColor = (
 
 const getStatusColor = (
   status: StoryStatus,
-): "default" | "info" | "warning" | "success" => {
+): "success" | "info" | "warning" | "default" => {
   switch (status) {
     case "DONE":
       return "success";
@@ -106,7 +108,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
         <CircularProgress />
       </Box>
     );
@@ -151,12 +153,12 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
     .slice(0, 5);
 
   return (
-    <Box>
-      {/* Back to Projects */}
+    <Box sx={{ maxWidth: 1300, mx: "auto" }}>
+      {/* Back Navigation Link */}
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate("/projects")}
-        sx={{ mb: 2 }}
+        sx={{ mb: 3 }}
       >
         Back to Projects
       </Button>
@@ -168,24 +170,26 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
           justifyContent: "space-between",
           alignItems: "flex-start",
           gap: 2,
-          mb: 3,
+          mb: 4,
+          flexWrap: "wrap",
         }}
       >
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, color: "text.primary" }}>
             {project.name}
           </Typography>
 
           {project.description && (
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 1, lineHeight: 1.5, maxWidth: 800 }}>
               {project.description}
             </Typography>
           )}
         </Box>
 
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1.5}>
           <Button
             variant="outlined"
+            startIcon={<EditIcon />}
             onClick={() => setIsEditDialogOpen(true)}
           >
             Edit Project
@@ -194,6 +198,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
           <Button
             variant="outlined"
             color="error"
+            startIcon={<DeleteIcon />}
             onClick={() => setIsDeleteDialogOpen(true)}
           >
             Delete Project
@@ -201,8 +206,8 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
         </Stack>
       </Box>
 
-      {/* Project Workspace Navigation Bar */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 4, backgroundColor: "#fafafa" }}>
+      {/* Project Workspaces Bar */}
+      <Paper variant="outlined" sx={{ p: 2, mb: 4, bgcolor: "background.paper", borderRadius: 3 }}>
         <Box
           sx={{
             display: "flex",
@@ -212,15 +217,17 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
             gap: 2,
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Project Workspaces
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>
+            Project Views
           </Typography>
 
-          <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+          <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }}>
             <Button
               variant="contained"
+              disableElevation
               startIcon={<DashboardIcon />}
               onClick={() => navigate(`/projects/${project.id}/board`)}
+              sx={{ fontWeight: 600 }}
             >
               Kanban Board
             </Button>
@@ -229,14 +236,16 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
               variant="outlined"
               startIcon={<AssignmentIcon />}
               onClick={() => navigate(`/projects/${project.id}/stories`)}
+              sx={{ fontWeight: 600 }}
             >
-              Stories
+              Stories ({totalStories})
             </Button>
 
             <Button
               variant="outlined"
               startIcon={<PeopleIcon />}
               onClick={() => navigate(`/projects/${project.id}/team`)}
+              sx={{ fontWeight: 600 }}
             >
               Team ({members.length})
             </Button>
@@ -246,7 +255,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
 
       {/* Overall Progress Section */}
       <Card variant="outlined" sx={{ mb: 4 }}>
-        <CardContent>
+        <CardContent sx={{ p: 3 }}>
           <Box
             sx={{
               display: "flex",
@@ -255,11 +264,11 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
               mb: 1.5,
             }}
           >
-            <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
-              Project Progress
+            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 700 }}>
+              Overall Project Progress
             </Typography>
 
-            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 800 }}>
               {progressPercentage}%
             </Typography>
           </Box>
@@ -267,19 +276,19 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
           <LinearProgress
             variant="determinate"
             value={progressPercentage}
-            sx={{ height: 10, borderRadius: 5, mb: 2 }}
+            sx={{ height: 10, borderRadius: 5, mb: 2.5, bgcolor: "divider" }}
           />
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="text.secondary">
-                <strong>Stories Done:</strong> {doneStories} of {totalStories} stories completed
+                <strong>Stories Completed:</strong> {doneStories} of {totalStories} user stories
               </Typography>
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: { sm: "right" } }}>
-                <strong>Story Points:</strong> {completedStoryPoints} of {totalStoryPoints} pts ({pointsProgressPercentage}%)
+                <strong>Story Points Delivered:</strong> {completedStoryPoints} of {totalStoryPoints} pts ({pointsProgressPercentage}%)
               </Typography>
             </Grid>
           </Grid>
@@ -287,28 +296,28 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
       </Card>
 
       {/* Project Statistics Grid */}
-      <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
-        Project Metrics
+      <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 700, mb: 2, letterSpacing: 0.3 }}>
+        PROJECT METRICS
       </Typography>
 
-      <Grid container spacing={2} sx={{ mb: 4 }}>
+      <Grid container spacing={2.5} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <DashboardStatCard
             title="Total Stories"
             value={totalStories}
             subtitle={`${backlogStories} backlog, ${inProgressStories} in progress`}
-            color="#1976d2"
-            icon={<AssignmentIcon />}
+            color="#1E64D4"
+            icon={<AssignmentIcon fontSize="small" />}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <DashboardStatCard
-            title="In Progress"
+            title="Active / Testing"
             value={inProgressStories + testingStories}
             subtitle={`${inProgressStories} active, ${testingStories} testing`}
-            color="#ed6c02"
-            icon={<HourglassTopIcon />}
+            color="#D97706"
+            icon={<HourglassTopIcon fontSize="small" />}
           />
         </Grid>
 
@@ -316,9 +325,9 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
           <DashboardStatCard
             title="Completed"
             value={doneStories}
-            subtitle={`${progressPercentage}% completion rate`}
-            color="#2e7d32"
-            icon={<CheckCircleIcon />}
+            subtitle={`${progressPercentage}% story completion rate`}
+            color="#16A34A"
+            icon={<CheckCircleIcon fontSize="small" />}
           />
         </Grid>
 
@@ -326,9 +335,9 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
           <DashboardStatCard
             title="Story Points"
             value={`${completedStoryPoints} / ${totalStoryPoints}`}
-            subtitle={`${pointsProgressPercentage}% points delivered`}
-            color="#9c27b0"
-            icon={<SpeedIcon />}
+            subtitle={`${pointsProgressPercentage}% velocity delivered`}
+            color="#9333EA"
+            icon={<SpeedIcon fontSize="small" />}
           />
         </Grid>
       </Grid>
@@ -338,7 +347,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
         {/* Recent Stories */}
         <Grid size={{ xs: 12, md: 7 }}>
           <Card variant="outlined" sx={{ height: "100%" }}>
-            <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%", p: 3 }}>
               <Box
                 sx={{
                   display: "flex",
@@ -347,20 +356,21 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                   mb: 2,
                 }}
               >
-                <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
-                  Recent Stories
+                <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 700 }}>
+                  Recent User Stories
                 </Typography>
 
                 <Button
                   size="small"
                   onClick={() => navigate(`/projects/${project.id}/stories`)}
+                  sx={{ fontWeight: 600 }}
                 >
                   View All ({totalStories})
                 </Button>
               </Box>
 
               {recentStories.length === 0 ? (
-                <Alert severity="info" sx={{ mt: 1 }}>
+                <Alert severity="info" sx={{ mt: 1, borderRadius: 2 }}>
                   No stories found for this project. Navigate to Stories to create one.
                 </Alert>
               ) : (
@@ -371,9 +381,9 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                       <ListItem
                         sx={{
                           py: 1.5,
-                          px: 1,
-                          borderRadius: 1,
-                          "&:hover": { backgroundColor: "#f5f5f5" },
+                          px: 1.5,
+                          borderRadius: 2,
+                          "&:hover": { backgroundColor: "#F8FAFC" },
                           cursor: "pointer",
                         }}
                         onClick={() =>
@@ -385,7 +395,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                             <Typography
                               variant="subtitle2"
                               sx={{
-                                fontWeight: 600,
+                                fontWeight: 700,
                                 "&:hover": { color: "primary.main" },
                               }}
                             >
@@ -396,15 +406,14 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                             <Stack
                               direction="row"
                               spacing={1}
-                              useFlexGap
-                              sx={{ mt: 0.5, flexWrap: "wrap", alignItems: "center" }}
+                              sx={{ mt: 0.8, flexWrap: "wrap", alignItems: "center" }}
                             >
                               <Chip
                                 label={story.status}
                                 size="small"
                                 color={getStatusColor(story.status)}
                                 variant="outlined"
-                                sx={{ height: 20, fontSize: "0.7rem" }}
+                                sx={{ height: 20, fontSize: "0.65rem", fontWeight: 700 }}
                               />
 
                               <Chip
@@ -412,10 +421,10 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                                 size="small"
                                 color={getPriorityColor(story.priority)}
                                 variant="outlined"
-                                sx={{ height: 20, fontSize: "0.7rem" }}
+                                sx={{ height: 20, fontSize: "0.65rem", fontWeight: 600 }}
                               />
 
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                                 {story.storyPoints} pts
                               </Typography>
                             </Stack>
@@ -433,7 +442,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
         {/* Team Summary */}
         <Grid size={{ xs: 12, md: 5 }}>
           <Card variant="outlined" sx={{ height: "100%" }}>
-            <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%", p: 3 }}>
               <Box
                 sx={{
                   display: "flex",
@@ -442,20 +451,21 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                   mb: 2,
                 }}
               >
-                <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
-                  Team Members
+                <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 700 }}>
+                  Project Team
                 </Typography>
 
                 <Button
                   size="small"
                   onClick={() => navigate(`/projects/${project.id}/team`)}
+                  sx={{ fontWeight: 600 }}
                 >
                   View Team ({members.length})
                 </Button>
               </Box>
 
               {members.length === 0 ? (
-                <Alert severity="info" sx={{ mt: 1 }}>
+                <Alert severity="info" sx={{ mt: 1, borderRadius: 2 }}>
                   No team members added yet. Navigate to Team to add members.
                 </Alert>
               ) : (
@@ -472,7 +482,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                               width: 36,
                               height: 36,
                               fontSize: "0.875rem",
-                              fontWeight: 600,
+                              fontWeight: 700,
                             }}
                           >
                             {member.name.charAt(0).toUpperCase()}
@@ -481,7 +491,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
 
                         <ListItemText
                           primary={
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                               {member.name}
                             </Typography>
                           }
@@ -490,7 +500,7 @@ function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
                               label={member.role}
                               size="small"
                               variant="outlined"
-                              sx={{ height: 20, fontSize: "0.7rem", mt: 0.2 }}
+                              sx={{ height: 20, fontSize: "0.65rem", mt: 0.4, fontWeight: 600 }}
                             />
                           }
                         />
