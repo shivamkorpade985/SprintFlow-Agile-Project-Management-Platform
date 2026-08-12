@@ -46,3 +46,7 @@ backend/.vscode/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+
+# Project documentation
+docs/
