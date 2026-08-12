@@ -1,0 +1,574 @@
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import HourglassTopIcon from "@mui/icons-material/HourglassTop";
+import PeopleIcon from "@mui/icons-material/People";
+import SpeedIcon from "@mui/icons-material/Speed";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+
+import { useProjects } from "../hooks/useProjects";
+import { useStories } from "../../stories/hooks/useStories";
+import { useProjectTeam } from "../../team/hooks/useProjectTeam";
+import type { StoryPriority, StoryStatus } from "../../stories/types/story";
+import ProjectFormDialog from "./ProjectFormDialog";
+import DashboardStatCard from "./DashboardStatCard";
+
+interface ProjectDashboardContentProps {
+  projectId: string;
+}
+
+const getPriorityColor = (
+  priority: StoryPriority,
+): "default" | "info" | "warning" | "error" => {
+  switch (priority) {
+    case "HIGH":
+      return "error";
+    case "MEDIUM":
+      return "warning";
+    case "LOW":
+      return "info";
+    default:
+      return "default";
+  }
+};
+
+const getStatusColor = (
+  status: StoryStatus,
+): "default" | "info" | "warning" | "success" => {
+  switch (status) {
+    case "DONE":
+      return "success";
+    case "IN_PROGRESS":
+      return "info";
+    case "TESTING":
+      return "warning";
+    case "BACKLOG":
+    default:
+      return "default";
+  }
+};
+
+function ProjectDashboardContent({ projectId }: ProjectDashboardContentProps) {
+  const navigate = useNavigate();
+
+  const {
+    projects,
+    isLoading: isLoadingProjects,
+    error: projectsError,
+    updateProject,
+    deleteProject,
+  } = useProjects();
+
+  const {
+    stories,
+    isLoading: isLoadingStories,
+    error: storiesError,
+  } = useStories();
+
+  const {
+    members,
+    isLoading: isLoadingTeam,
+    error: teamError,
+  } = useProjectTeam();
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const isLoading = isLoadingProjects || isLoadingStories || isLoadingTeam;
+  const error = projectsError || storiesError || teamError;
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
+  const project = projects.find((item) => item.id === projectId);
+
+  if (!project) {
+    return <Alert severity="error">Project not found.</Alert>;
+  }
+
+  // Derived statistics
+  const totalStories = stories.length;
+  const backlogStories = stories.filter((s) => s.status === "BACKLOG").length;
+  const inProgressStories = stories.filter((s) => s.status === "IN_PROGRESS").length;
+  const testingStories = stories.filter((s) => s.status === "TESTING").length;
+  const doneStories = stories.filter((s) => s.status === "DONE").length;
+
+  const totalStoryPoints = stories.reduce((sum, s) => sum + s.storyPoints, 0);
+  const completedStoryPoints = stories
+    .filter((s) => s.status === "DONE")
+    .reduce((sum, s) => sum + s.storyPoints, 0);
+
+  const progressPercentage =
+    totalStories > 0 ? Math.round((doneStories / totalStories) * 100) : 0;
+
+  const pointsProgressPercentage =
+    totalStoryPoints > 0
+      ? Math.round((completedStoryPoints / totalStoryPoints) * 100)
+      : 0;
+
+  // Recent stories (sorted newest first, max 5)
+  const recentStories = [...stories]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5);
+
+  return (
+    <Box>
+      {/* Back to Projects */}
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate("/projects")}
+        sx={{ mb: 2 }}
+      >
+        Back to Projects
+      </Button>
+
+      {/* Project Header */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 2,
+          mb: 3,
+        }}
+      >
+        <Box>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+            {project.name}
+          </Typography>
+
+          {project.description && (
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+              {project.description}
+            </Typography>
+          )}
+        </Box>
+
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            onClick={() => setIsEditDialogOpen(true)}
+          >
+            Edit Project
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
+            Delete Project
+          </Button>
+        </Stack>
+      </Box>
+
+      {/* Project Workspace Navigation Bar */}
+      <Paper variant="outlined" sx={{ p: 2, mb: 4, backgroundColor: "#fafafa" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Project Workspaces
+          </Typography>
+
+          <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+            <Button
+              variant="contained"
+              startIcon={<DashboardIcon />}
+              onClick={() => navigate(`/projects/${project.id}/board`)}
+            >
+              Kanban Board
+            </Button>
+
+            <Button
+              variant="outlined"
+              startIcon={<AssignmentIcon />}
+              onClick={() => navigate(`/projects/${project.id}/stories`)}
+            >
+              Stories
+            </Button>
+
+            <Button
+              variant="outlined"
+              startIcon={<PeopleIcon />}
+              onClick={() => navigate(`/projects/${project.id}/team`)}
+            >
+              Team ({members.length})
+            </Button>
+          </Stack>
+        </Box>
+      </Paper>
+
+      {/* Overall Progress Section */}
+      <Card variant="outlined" sx={{ mb: 4 }}>
+        <CardContent>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1.5,
+            }}
+          >
+            <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+              Project Progress
+            </Typography>
+
+            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
+              {progressPercentage}%
+            </Typography>
+          </Box>
+
+          <LinearProgress
+            variant="determinate"
+            value={progressPercentage}
+            sx={{ height: 10, borderRadius: 5, mb: 2 }}
+          />
+
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography variant="body2" color="text.secondary">
+                <strong>Stories Done:</strong> {doneStories} of {totalStories} stories completed
+              </Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: { sm: "right" } }}>
+                <strong>Story Points:</strong> {completedStoryPoints} of {totalStoryPoints} pts ({pointsProgressPercentage}%)
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Project Statistics Grid */}
+      <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
+        Project Metrics
+      </Typography>
+
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <DashboardStatCard
+            title="Total Stories"
+            value={totalStories}
+            subtitle={`${backlogStories} backlog, ${inProgressStories} in progress`}
+            color="#1976d2"
+            icon={<AssignmentIcon />}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <DashboardStatCard
+            title="In Progress"
+            value={inProgressStories + testingStories}
+            subtitle={`${inProgressStories} active, ${testingStories} testing`}
+            color="#ed6c02"
+            icon={<HourglassTopIcon />}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <DashboardStatCard
+            title="Completed"
+            value={doneStories}
+            subtitle={`${progressPercentage}% completion rate`}
+            color="#2e7d32"
+            icon={<CheckCircleIcon />}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <DashboardStatCard
+            title="Story Points"
+            value={`${completedStoryPoints} / ${totalStoryPoints}`}
+            subtitle={`${pointsProgressPercentage}% points delivered`}
+            color="#9c27b0"
+            icon={<SpeedIcon />}
+          />
+        </Grid>
+      </Grid>
+
+      {/* Recent Stories & Team Summary Section */}
+      <Grid container spacing={3}>
+        {/* Recent Stories */}
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Card variant="outlined" sx={{ height: "100%" }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+                  Recent Stories
+                </Typography>
+
+                <Button
+                  size="small"
+                  onClick={() => navigate(`/projects/${project.id}/stories`)}
+                >
+                  View All ({totalStories})
+                </Button>
+              </Box>
+
+              {recentStories.length === 0 ? (
+                <Alert severity="info" sx={{ mt: 1 }}>
+                  No stories found for this project. Navigate to Stories to create one.
+                </Alert>
+              ) : (
+                <List disablePadding sx={{ flexGrow: 1 }}>
+                  {recentStories.map((story, index) => (
+                    <Box key={story.id}>
+                      {index > 0 && <Divider component="li" />}
+                      <ListItem
+                        sx={{
+                          py: 1.5,
+                          px: 1,
+                          borderRadius: 1,
+                          "&:hover": { backgroundColor: "#f5f5f5" },
+                          cursor: "pointer",
+                        }}
+                        onClick={() =>
+                          navigate(`/projects/${project.id}/stories/${story.id}`)
+                        }
+                      >
+                        <ListItemText
+                          primary={
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontWeight: 600,
+                                "&:hover": { color: "primary.main" },
+                              }}
+                            >
+                              {story.title}
+                            </Typography>
+                          }
+                          secondary={
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              useFlexGap
+                              sx={{ mt: 0.5, flexWrap: "wrap", alignItems: "center" }}
+                            >
+                              <Chip
+                                label={story.status}
+                                size="small"
+                                color={getStatusColor(story.status)}
+                                variant="outlined"
+                                sx={{ height: 20, fontSize: "0.7rem" }}
+                              />
+
+                              <Chip
+                                label={story.priority}
+                                size="small"
+                                color={getPriorityColor(story.priority)}
+                                variant="outlined"
+                                sx={{ height: 20, fontSize: "0.7rem" }}
+                              />
+
+                              <Typography variant="caption" color="text.secondary">
+                                {story.storyPoints} pts
+                              </Typography>
+                            </Stack>
+                          }
+                        />
+                      </ListItem>
+                    </Box>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Team Summary */}
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Card variant="outlined" sx={{ height: "100%" }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+                  Team Members
+                </Typography>
+
+                <Button
+                  size="small"
+                  onClick={() => navigate(`/projects/${project.id}/team`)}
+                >
+                  View Team ({members.length})
+                </Button>
+              </Box>
+
+              {members.length === 0 ? (
+                <Alert severity="info" sx={{ mt: 1 }}>
+                  No team members added yet. Navigate to Team to add members.
+                </Alert>
+              ) : (
+                <List disablePadding sx={{ flexGrow: 1 }}>
+                  {members.slice(0, 5).map((member, index) => (
+                    <Box key={member.id}>
+                      {index > 0 && <Divider component="li" />}
+                      <ListItem sx={{ py: 1.5, px: 1 }}>
+                        <ListItemAvatar>
+                          <Avatar
+                            src={member.avatar}
+                            sx={{
+                              bgcolor: "primary.main",
+                              width: 36,
+                              height: 36,
+                              fontSize: "0.875rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {member.name.charAt(0).toUpperCase()}
+                          </Avatar>
+                        </ListItemAvatar>
+
+                        <ListItemText
+                          primary={
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                              {member.name}
+                            </Typography>
+                          }
+                          secondary={
+                            <Chip
+                              label={member.role}
+                              size="small"
+                              variant="outlined"
+                              sx={{ height: 20, fontSize: "0.7rem", mt: 0.2 }}
+                            />
+                          }
+                        />
+                      </ListItem>
+                    </Box>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Edit Project Dialog */}
+      <ProjectFormDialog
+        open={isEditDialogOpen}
+        title="Edit Project"
+        submitLabel="Save Changes"
+        initialValues={{
+          name: project.name,
+          description: project.description,
+        }}
+        onClose={() => setIsEditDialogOpen(false)}
+        onSubmit={async (values) => {
+          await updateProject(project.id, values);
+        }}
+      />
+
+      {/* Delete Project Dialog */}
+      <Dialog
+        open={isDeleteDialogOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setIsDeleteDialogOpen(false);
+          }
+        }}
+      >
+        <DialogTitle>Delete Project</DialogTitle>
+
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{project.name}"?
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() => setIsDeleteDialogOpen(false)}
+            disabled={isDeleting}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            loading={isDeleting}
+            onClick={async () => {
+              try {
+                setIsDeleting(true);
+                await deleteProject(project.id);
+                setIsDeleteDialogOpen(false);
+                navigate("/projects");
+              } finally {
+                setIsDeleting(false);
+              }
+            }}
+          >
+            Delete Project
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}
+
+export default ProjectDashboardContent;
