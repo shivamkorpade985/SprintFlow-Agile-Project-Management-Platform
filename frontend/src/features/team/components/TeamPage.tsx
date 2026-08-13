@@ -1,3 +1,14 @@
+/**
+ * TeamPage
+ *
+ * Project team management view (`/projects/:projectId/team`).
+ *
+ * Responsibilities:
+ * - Mounts `ProjectTeamProvider` for `:projectId`.
+ * - Displays grid of assigned project team members with role badges and initial-letter avatars.
+ * - Navigates to user profile (`/projects/:projectId/team/:userId`) on member click.
+ * - Handles adding new team members (`AddMemberDialog`) and removing members (`removeMember`).
+ */
 import {
   Alert,
   Avatar,
@@ -112,9 +123,8 @@ function TeamContent() {
                   <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between" }}>
                     <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexGrow: 1, minWidth: 0 }}>
                       <Avatar
-                        src={member.avatar}
                         sx={{
-                          bgcolor: "primary.main",
+                          bgcolor: member.avatar || "primary.main",
                           width: 48,
                           height: 48,
                           fontWeight: 700,

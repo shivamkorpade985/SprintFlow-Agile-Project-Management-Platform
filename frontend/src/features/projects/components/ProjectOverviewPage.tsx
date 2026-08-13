@@ -1,3 +1,12 @@
+/**
+ * ProjectOverviewPage
+ *
+ * Overview and dashboard metrics page for an active project (`/projects/:projectId`).
+ *
+ * Responsibilities:
+ * - Reads `:projectId` parameter from URL.
+ * - Wraps `ProjectDashboardContent` with `StoriesProvider` and `ProjectTeamProvider`.
+ */
 import { Alert } from "@mui/material";
 import { useParams } from "react-router";
 

@@ -1,3 +1,13 @@
+/**
+ * BoardPage
+ *
+ * Page component for the interactive project Kanban Board (`/projects/:projectId/board`).
+ *
+ * Responsibilities:
+ * - Reads `:projectId` parameter from URL.
+ * - Wraps `KanbanBoardView` with `StoriesProvider` (for story lifecycle & drag updates)
+ *   and `ProjectTeamProvider` (for resolving story assignee names and avatars).
+ */
 import { Alert } from "@mui/material";
 import { useParams } from "react-router";
 

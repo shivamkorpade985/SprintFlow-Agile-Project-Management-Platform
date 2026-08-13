@@ -1,3 +1,13 @@
+/**
+ * LocalStorageProjectRepository
+ *
+ * Client-side implementation of `ProjectRepository` backed by browser `localStorage`.
+ *
+ * Storage Details:
+ * - Key: `STORAGE_KEYS.PROJECTS` ("sprintflow_projects")
+ * - Generates unique client UUIDs (`crypto.randomUUID()`) for new projects.
+ * - Handles read/write JSON serialization safely via typed `getItem` / `setItem` helpers.
+ */
 import type { Project } from "../../features/projects/types/project";
 import type {
   CreateProjectRequest,

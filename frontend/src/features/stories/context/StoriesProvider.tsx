@@ -1,3 +1,28 @@
+/**
+ * StoriesProvider
+ *
+ * Context Provider owning project-scoped user stories state for a given `projectId`.
+ *
+ * Data Architecture & Flow:
+ * Component (KanbanBoardView / StoriesPage / StoryDetailPage)
+ *   ↓
+ * useStories()
+ *   ↓
+ * StoriesContext
+ *   ↓
+ * StoriesProvider (projectId)
+ *   ↓
+ * StoryRepository (LocalStorageStoryRepository)
+ *   ↓
+ * localStorage
+ *
+ * Scope: Per-project (Mounted on project-specific story routes).
+ *
+ * Key Behaviors:
+ * - Single source of truth for all story views (Kanban board, Stories backlog, Story Detail).
+ * - Story status changes triggered via drag-and-drop or dropdown select update state through `updateStory()`.
+ * - State mutations synchronously update React state upon repository success, ensuring all views remain 100% in sync.
+ */
 import {
   useCallback,
   useEffect,

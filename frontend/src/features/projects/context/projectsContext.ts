@@ -1,3 +1,11 @@
+/**
+ * ProjectsContext
+ *
+ * Defines the React Context contract for managing global project state.
+ *
+ * Components consume this state via `useProjects()` custom hook rather than calling
+ * `useContext(ProjectsContext)` directly.
+ */
 import { createContext } from "react";
 import type { CreateProjectRequest, UpdateProjectRequest } from "../types/contracts/project";
 import type { Project } from "../types/project";

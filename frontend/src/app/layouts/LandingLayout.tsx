@@ -1,3 +1,13 @@
+/**
+ * LandingLayout
+ *
+ * Public layout container for marketing, landing, and documentation pages (`/`).
+ *
+ * Key Differences from AppLayout:
+ * - Does NOT include the workspace navigation drawer or active project context.
+ * - Features smooth-scrolling section navigation (`handleNavClick`).
+ * - Provides a direct call-to-action button leading to the application workspace (`/projects`).
+ */
 import {
   AppBar,
   Box,
@@ -13,6 +23,7 @@ import { Outlet, useNavigate } from "react-router";
 export default function LandingLayout() {
   const navigate = useNavigate();
 
+  // Smooth scroll handler for anchor links on public marketing pages
   const handleNavClick = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {

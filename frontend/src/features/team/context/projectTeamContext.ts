@@ -1,3 +1,10 @@
+/**
+ * ProjectTeamContext
+ *
+ * Defines the React Context contract for project team membership management.
+ *
+ * Components consume this via `useProjectTeam()` custom hook.
+ */
 import { createContext } from "react";
 import type { User } from "../types/user";
 

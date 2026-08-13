@@ -1,3 +1,24 @@
+/**
+ * AppLayout
+ *
+ * Core layout component for the application workspace (`/projects/*`).
+ *
+ * Architecture Flow:
+ * AppLayout
+ *   ↓
+ * ProjectsProvider  <-- Mounts global projects state for navigation & breadcrumbs
+ *   ↓
+ * AppLayoutContent
+ *   ├── AppBar      <-- Fixed top header with branding & active project breadcrumb
+ *   ├── Drawer      <-- Responsive sidebar (Permanent on desktop, temporary on mobile)
+ *   └── Main Box    <-- `<Outlet />` renders active child page route
+ *
+ * Responsibilities:
+ * - Mounts `ProjectsProvider` at the top level so navigation sidebar can display project names.
+ * - Extracts `:projectId` from route parameters to provide contextual sidebar navigation (Overview, Board, Stories, Team).
+ * - Matches current `location.pathname` to highlight active navigation items.
+ * - Handles responsive drawer toggling for mobile viewports.
+ */
 import {
   AppBar,
   Box,
@@ -36,6 +57,7 @@ function AppLayoutContent() {
   const params = useParams<{ projectId?: string }>();
   const projectId = params.projectId;
 
+  // Consume projects state to resolve current project name for sidebar and top breadcrumbs
   const { projects } = useProjects();
   const currentProject = projects.find((p) => p.id === projectId);
 
@@ -49,6 +71,7 @@ function AppLayoutContent() {
     }
   };
 
+  // Derived route active states for nav items highlighting
   const isOverviewActive =
     Boolean(projectId) && location.pathname === `/projects/${projectId}`;
   const isBoardActive =
@@ -67,7 +90,7 @@ function AppLayoutContent() {
       <Toolbar />
 
       {projectId ? (
-        // Contextual Sidebar Navigation — Inside Project
+        // Contextual Sidebar Navigation — Inside Project Scope
         <Box sx={{ p: 2, flexGrow: 1, overflowY: "auto" }}>
           {/* Project Header */}
           <Box sx={{ mb: 2, px: 1 }}>
@@ -199,7 +222,7 @@ function AppLayoutContent() {
           </List>
         </Box>
       ) : (
-        // Contextual Sidebar Navigation — Workspace / All Projects
+        // Contextual Sidebar Navigation — Global Workspace Level
         <Box sx={{ p: 2, flexGrow: 1 }}>
           <List
             component="nav"
@@ -318,7 +341,7 @@ function AppLayoutContent() {
             </Box>
           )}
 
-          {/* Future User Area Spacer */}
+          {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
         </Toolbar>
       </AppBar>

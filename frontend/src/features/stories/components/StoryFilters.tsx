@@ -1,3 +1,13 @@
+/**
+ * StoryFilters
+ *
+ * Filter toolbar component for searching and refining the user story backlog list.
+ *
+ * State Mechanism:
+ * - Operates entirely through URL query parameters using React Router's `useSearchParams`.
+ * - `updateParam`: Updates matching URL search key (`search`, `assignee`, `priority`) immutably.
+ * - Why URL params over local React state: Users can refresh the page or share the URL with filters intact.
+ */
 import {
   Box,
   Button,
@@ -47,6 +57,7 @@ export default function StoryFilters({
       myTasksParam,
   );
 
+  // Helper method for updating individual URL query parameters
   const updateParam = (key: string, value: string | boolean) => {
     const nextParams = new URLSearchParams(searchParams);
 

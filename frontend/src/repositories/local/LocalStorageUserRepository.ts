@@ -1,3 +1,13 @@
+/**
+ * LocalStorageUserRepository
+ *
+ * Client-side implementation of `UserRepository` backed by browser `localStorage`.
+ *
+ * Storage Details:
+ * - Key: `STORAGE_KEYS.USERS` ("sprintflow_users")
+ * - Manages global system user profiles.
+ * - `updateUser` modifies user records immutably while preserving user ID.
+ */
 import type { User } from "../../features/team/types/user";
 import type {
   CreateUserRequest,

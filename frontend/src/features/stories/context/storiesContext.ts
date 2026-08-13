@@ -1,3 +1,10 @@
+/**
+ * StoriesContext
+ *
+ * Contract defining the context value exposed by `StoriesProvider`.
+ *
+ * Components consume this context via `useStories()` custom hook.
+ */
 import { createContext } from "react";
 import type { UserStory } from "../types/story";
 import type {

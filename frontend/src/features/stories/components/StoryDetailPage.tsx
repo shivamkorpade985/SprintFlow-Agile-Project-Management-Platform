@@ -1,3 +1,14 @@
+/**
+ * StoryDetailPage
+ *
+ * Detailed view for an individual user story (`/projects/:projectId/stories/:storyId`).
+ *
+ * Responsibilities:
+ * - Mounts `StoriesProvider` and `ProjectTeamProvider` for the current `:projectId`.
+ * - Resolves story matching `:storyId` from `stories` context.
+ * - Displays full story details (Title, Status, Priority, Points, Assignee avatar/name, Created date, Description).
+ * - Triggers deletion with confirmation modal and redirects back to backlog upon deletion.
+ */
 import {
   Alert,
   Avatar,
@@ -214,7 +225,7 @@ function StoryDetailContent({ projectId, storyId }: StoryDetailContentProps) {
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 1 }}>
                   {assignee ? (
                     <>
-                      <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "primary.main" }}>
+                      <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: assignee.avatar || "primary.main" }}>
                         {assignee.name.charAt(0).toUpperCase()}
                       </Avatar>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>

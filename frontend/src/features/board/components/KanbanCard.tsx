@@ -1,3 +1,14 @@
+/**
+ * KanbanCard
+ *
+ * Story card item rendered inside Kanban column lists.
+ *
+ * Features:
+ * - HTML5 Native Drag & Drop (`draggable`, `onDragStart`, `onDragEnd`).
+ * - Transmits `story.id` via `e.dataTransfer.setData("text/plain", story.id)`.
+ * - Status select dropdown allowing inline status updates directly from the card.
+ * - Displays priority chip, story points badge, and assignee avatar with initial letter.
+ */
 import {
   Avatar,
   Box,
@@ -56,7 +67,9 @@ function KanbanCard({
 }: KanbanCardProps) {
   const navigate = useNavigate();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
+  // Status select dropdown change handler
   const handleStatusSelect = async (event: SelectChangeEvent<string>) => {
     const newStatus = event.target.value as StoryStatus;
     if (newStatus === story.status) {
@@ -81,10 +94,22 @@ function KanbanCard({
   return (
     <Card
       variant="outlined"
+      draggable
+      onDragStart={(e) => {
+        // Attach story ID to drag data transfer object
+        e.dataTransfer.setData("text/plain", story.id);
+        e.dataTransfer.effectAllowed = "move";
+        setIsDragging(true);
+      }}
+      onDragEnd={() => {
+        setIsDragging(false);
+      }}
       sx={{
         mb: 2,
         bgcolor: "background.paper",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+        cursor: isDragging ? "grabbing" : "grab",
+        opacity: isDragging ? 0.5 : 1,
+        transition: "transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease",
         "&:hover": {
           transform: "translateY(-2px)",
           boxShadow: "0 6px 12px -2px rgba(0, 0, 0, 0.08)",
@@ -155,7 +180,7 @@ function KanbanCard({
           {assignee ? (
             <Chip
               avatar={
-                <Avatar sx={{ width: 16, height: 16, fontSize: "0.6rem", bgcolor: "primary.main" }}>
+                <Avatar sx={{ width: 16, height: 16, fontSize: "0.6rem", bgcolor: assignee.avatar || "primary.main" }}>
                   {assignee.name.charAt(0).toUpperCase()}
                 </Avatar>
               }

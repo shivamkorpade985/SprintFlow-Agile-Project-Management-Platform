@@ -1,3 +1,14 @@
+/**
+ * LocalStorageStoryRepository
+ *
+ * Client-side implementation of `StoryRepository` backed by browser `localStorage`.
+ *
+ * Storage Details:
+ * - Key: `STORAGE_KEYS.STORIES` ("sprintflow_stories")
+ * - `getStoriesByProject`: Filters global stories array by `story.projectId`.
+ * - `createStory`: Automatically injects `id` (UUID) and `createdAt` (ISO timestamp).
+ * - `updateStory`: Merges update payload while preserving `id`, `projectId`, and `createdAt`.
+ */
 import type { UserStory } from "../../features/stories/types/story";
 import type {
   CreateStoryRequest,

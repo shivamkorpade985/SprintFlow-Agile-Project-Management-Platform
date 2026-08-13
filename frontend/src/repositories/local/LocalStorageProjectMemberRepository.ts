@@ -1,3 +1,14 @@
+/**
+ * LocalStorageProjectMemberRepository
+ *
+ * Client-side implementation of `ProjectMemberRepository` backed by `localStorage`.
+ *
+ * Storage Details:
+ * - Key: `STORAGE_KEYS.PROJECT_MEMBERS` ("sprintflow_project_members")
+ * - `getMembers`: Filters global membership records by `projectId`.
+ * - `addMember`: Prevents duplicate `(projectId, userId)` membership records.
+ * - `removeMember`: Removes matching `(projectId, userId)` association.
+ */
 import type { ProjectMember } from "../../features/team/types/projectMember";
 import { STORAGE_KEYS } from "../../constants/storageKeys";
 import { getItem, setItem } from "../../storage/localStorage";

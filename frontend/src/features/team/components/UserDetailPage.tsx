@@ -1,3 +1,13 @@
+/**
+ * UserDetailPage
+ *
+ * Profile view for an individual system user (`/projects/:projectId/team/:userId`).
+ *
+ * Responsibilities:
+ * - Reads `:userId` from route parameters.
+ * - Queries system-wide user details via `UserRepository.getUserById(userId)`.
+ * - Displays user avatar circle with initial letter, name, system ID, and assigned role.
+ */
 import {
   Alert,
   Avatar,
@@ -131,11 +141,10 @@ function UserDetailPage() {
           {/* User Profile Header */}
           <Stack direction="row" spacing={3} sx={{ alignItems: "center", mb: 3 }}>
             <Avatar
-              src={user.avatar}
               sx={{
                 width: 72,
                 height: 72,
-                bgcolor: "primary.main",
+                bgcolor: user.avatar || "primary.main",
                 fontSize: "1.75rem",
                 fontWeight: 700,
                 boxShadow: 2,

@@ -1,3 +1,12 @@
+/**
+ * StoryCard
+ *
+ * Card component for displaying individual user stories within the backlog listing (`StoriesPage`).
+ *
+ * Responsibilities:
+ * - Renders story title, description snippet, status, priority badge, points, and assignee avatar.
+ * - Delegates editing (`onEdit`) and deletion (`onDelete`) actions to parent container component.
+ */
 import {
   Avatar,
   Box,
@@ -156,7 +165,7 @@ function StoryCard({
               {assignee ? (
                 <Chip
                   avatar={
-                    <Avatar sx={{ width: 18, height: 18, fontSize: "0.65rem", bgcolor: "primary.main" }}>
+                    <Avatar sx={{ width: 18, height: 18, fontSize: "0.65rem", bgcolor: assignee.avatar || "primary.main" }}>
                       {assignee.name.charAt(0).toUpperCase()}
                     </Avatar>
                   }

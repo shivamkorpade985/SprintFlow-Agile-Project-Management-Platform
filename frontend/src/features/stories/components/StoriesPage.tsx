@@ -1,3 +1,18 @@
+/**
+ * StoriesPage
+ *
+ * Backlog & user story management view (`/projects/:projectId/stories`).
+ *
+ * Responsibilities:
+ * - Wraps content in `ProjectTeamProvider` and `StoriesProvider`.
+ * - Restricts story assignee creation/editing options strictly to current project team members (`members`).
+ * - URL Search Parameter Filter Synchronization (`useSearchParams`):
+ *   - Search (`search=...`): Title term filtering.
+ *   - Assignee (`assignee=...`): Project team member ID or UNASSIGNED.
+ *   - Priority (`priority=...`): HIGH / MEDIUM / LOW.
+ *   - My Tasks (`myTasks=true`): Filter by current user.
+ * - Benefits of URL state: Browser refresh and back/forward navigation preserve active filters naturally.
+ */
 import {
   Alert,
   Box,
@@ -7,11 +22,11 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 
-import { LocalStorageUserRepository } from "../../../repositories/local/LocalStorageUserRepository";
-import type { User } from "../../team/types/user";
+import { ProjectTeamProvider } from "../../team/context/ProjectTeamProvider";
+import { useProjectTeam } from "../../team/hooks/useProjectTeam";
 
 import { StoriesProvider } from "../context/StoriesProvider";
 import { useStories } from "../hooks/useStories";
@@ -22,8 +37,6 @@ import EditStoryDialog from "./EditStoryDialog";
 import StoryCard from "./StoryCard";
 import StoryFilters from "./StoryFilters";
 
-const userRepository = new LocalStorageUserRepository();
-
 interface StoriesContentProps {
   projectId: string;
 }
@@ -32,51 +45,14 @@ function StoriesContent({ projectId }: StoriesContentProps) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { stories, isLoading, error, deleteStory } = useStories();
+  const { stories, isLoading: isLoadingStories, error: storiesError, deleteStory } = useStories();
+  const { members, isLoading: isLoadingTeam, error: teamError } = useProjectTeam();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingStory, setEditingStory] = useState<UserStory | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const [userLoadError, setUserLoadError] = useState<string | null>(null);
 
-  // Load team users on mount so filters & cards have assignee identities
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadUsers = async () => {
-      try {
-        const data = await userRepository.getUsers();
-        if (isMounted) {
-          setUsers(data);
-        }
-      } catch {
-        if (isMounted) {
-          setUserLoadError("Failed to load team members.");
-        }
-      }
-    };
-
-    void loadUsers();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const handleOpenCreateDialog = async () => {
-    try {
-      setIsLoadingUsers(true);
-      setUserLoadError(null);
-      const data = await userRepository.getUsers();
-      setUsers(data);
-      setIsCreateDialogOpen(true);
-    } catch {
-      setUserLoadError("Failed to load team members.");
-    } finally {
-      setIsLoadingUsers(false);
-    }
-  };
+  const isLoading = isLoadingStories || isLoadingTeam;
+  const error = storiesError || teamError;
 
   const handleDeleteStory = async (story: UserStory) => {
     const confirmed = window.confirm(`Delete "${story.title}"?`);
@@ -175,8 +151,7 @@ function StoriesContent({ projectId }: StoriesContentProps) {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => void handleOpenCreateDialog()}
-          loading={isLoadingUsers}
+          onClick={() => setIsCreateDialogOpen(true)}
           disableElevation
           sx={{ px: 2.5, py: 1 }}
         >
@@ -184,17 +159,10 @@ function StoriesContent({ projectId }: StoriesContentProps) {
         </Button>
       </Box>
 
-      {/* User loading error alert */}
-      {userLoadError && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {userLoadError}
-        </Alert>
-      )}
-
       {/* Filter Toolbar */}
       {stories.length > 0 && (
         <StoryFilters
-          users={users}
+          users={members}
           totalStoriesCount={stories.length}
           filteredStoriesCount={filteredStories.length}
         />
@@ -231,7 +199,7 @@ function StoriesContent({ projectId }: StoriesContentProps) {
           }}
         >
           {filteredStories.map((story) => {
-            const assignee = users.find(
+            const assignee = members.find(
               (user) => user.id === story.assignedUserId,
             );
 
@@ -255,7 +223,7 @@ function StoriesContent({ projectId }: StoriesContentProps) {
       <CreateStoryDialog
         open={isCreateDialogOpen}
         projectId={projectId}
-        users={users}
+        users={members}
         onClose={() => setIsCreateDialogOpen(false)}
       />
 
@@ -263,7 +231,7 @@ function StoriesContent({ projectId }: StoriesContentProps) {
       <EditStoryDialog
         open={editingStory !== null}
         story={editingStory}
-        users={users}
+        users={members}
         onClose={() => setEditingStory(null)}
       />
     </Box>
@@ -280,9 +248,11 @@ function StoriesPage() {
   }
 
   return (
-    <StoriesProvider projectId={projectId}>
-      <StoriesContent projectId={projectId} />
-    </StoriesProvider>
+    <ProjectTeamProvider projectId={projectId}>
+      <StoriesProvider projectId={projectId}>
+        <StoriesContent projectId={projectId} />
+      </StoriesProvider>
+    </ProjectTeamProvider>
   );
 }
 

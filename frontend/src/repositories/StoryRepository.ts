@@ -1,3 +1,11 @@
+/**
+ * StoryRepository Interface
+ *
+ * Persistence abstraction for User Story CRUD operations.
+ *
+ * All story queries (listing, creation, updates, deletion) pass through this contract.
+ * `StoriesProvider` relies on this interface to keep UI components decoupled from storage.
+ */
 import type { UserStory } from "../features/stories/types/story";
 import type {
   CreateStoryRequest,

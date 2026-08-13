@@ -1,3 +1,22 @@
+/**
+ * ProjectTeamProvider
+ *
+ * Context Provider owning the project team members state for a specific `projectId`.
+ *
+ * Domain Model Relationship:
+ * System User (UserRepository)
+ *   ↓
+ * Project Membership (ProjectMemberRepository: projectId, userId)
+ *   ↓
+ * Project Team Members (`members: User[]`)
+ *   ↓
+ * Story Assignees (In CreateStoryDialog / EditStoryDialog / KanbanCard / StoryCard)
+ *
+ * Responsibilities:
+ * - Queries project memberships and resolves full `User` objects for the specified `projectId`.
+ * - Exposes `members` list used across Team Page, Story Assignees, Kanban Board, and Dashboard.
+ * - Handles `addMember` and `removeMember` operations, instantly refreshing team state.
+ */
 import {
   useCallback,
   useEffect,
@@ -93,48 +112,46 @@ export function ProjectTeamProvider({
     [projectId, refreshMembers],
   );
 
-useEffect(() => {
-  let isMounted = true;
+  useEffect(() => {
+    let isMounted = true;
 
-  const loadMembers = async () => {
-    try {
-      const memberships =
-        await projectMemberRepository.getMembers(projectId);
+    const loadMembers = async () => {
+      try {
+        const memberships =
+          await projectMemberRepository.getMembers(projectId);
 
-      const users = await userRepository.getUsers();
+        const users = await userRepository.getUsers();
 
-      const memberUserIds = new Set(
-        memberships.map(
-          (membership) => membership.userId,
-        ),
-      );
+        const memberUserIds = new Set(
+          memberships.map(
+            (membership) => membership.userId,
+          ),
+        );
 
-      const projectMembers = users.filter((user) =>
-        memberUserIds.has(user.id),
-      );
+        const projectMembers = users.filter((user) =>
+          memberUserIds.has(user.id),
+        );
 
-      if (isMounted) {
-        setMembers(projectMembers);
+        if (isMounted) {
+          setMembers(projectMembers);
+        }
+      } catch {
+        if (isMounted) {
+          setError("Failed to load project team.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    } catch {
-      if (isMounted) {
-        setError("Failed to load project team.");
-      }
-    } finally {
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    }
-  };
+    };
 
-  void loadMembers();
+    void loadMembers();
 
-  return () => {
-    isMounted = false;
-  };
-}, [projectId]);
-
-
+    return () => {
+      isMounted = false;
+    };
+  }, [projectId]);
 
   return (
     <ProjectTeamContext.Provider

@@ -1,3 +1,29 @@
+/**
+ * ProjectsProvider
+ *
+ * Global Context Provider owning the workspace-level projects collection.
+ *
+ * Data Flow:
+ * Component
+ *   ↓
+ * useProjects()
+ *   ↓
+ * ProjectsContext
+ *   ↓
+ * ProjectsProvider
+ *   ↓
+ * ProjectRepository (LocalStorageProjectRepository)
+ *   ↓
+ * localStorage
+ *
+ * Scope: Global (Mounted in `AppLayout` around all workspace routes).
+ *
+ * Responsibilities:
+ * - Fetches and stores the list of all projects on mount.
+ * - Exposes state: `projects`, `isLoading`, `error`.
+ * - Exposes mutation methods: `createProject`, `updateProject`, `deleteProject`, `refreshProjects`.
+ * - Updates local React state immutably upon repository success to keep all subscribers synchronized.
+ */
 import { useCallback, useEffect, useState } from "react";
 import type { Project } from "../types/project";
 import type {
