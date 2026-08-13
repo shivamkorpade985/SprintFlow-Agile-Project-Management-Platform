@@ -10,28 +10,28 @@ SprintFlow enables software teams to manage projects, author user stories, track
 
 ## 📸 Product Preview
 
-### Landing Experience
+### Landing Page
 
 ![SprintFlow Landing Page](docs/landing_page.png)
 
-### Project Workspace
+### Projects Workspace
 
-![Projects Page](docs/projects_page.png)
+![Projects Workspace](docs/projects_page.png)
 
 ### Project Dashboard
 
-<p>
+<p align="center">
   <img src="docs/project_overview_with_dashboard1.png" alt="Dashboard — Progress & Metrics" width="48%" />
   <img src="docs/project_overview_with_dashboard2.png" alt="Dashboard — Stories & Team" width="48%" />
 </p>
 
+### Stories
+
+![Stories Backlog](docs/stories.png)
+
 ### Kanban Board
 
 ![Kanban Board](docs/board.png)
-
-### User Stories
-
-![Stories Backlog](docs/stories.png)
 
 ### Story Details
 
