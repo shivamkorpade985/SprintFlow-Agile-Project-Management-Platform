@@ -2,11 +2,6 @@
  * LocalStorageUserRepository
  *
  * Client-side implementation of `UserRepository` backed by browser `localStorage`.
- *
- * Storage Details:
- * - Key: `STORAGE_KEYS.USERS` ("sprintflow_users")
- * - Manages global system user profiles.
- * - `updateUser` modifies user records immutably while preserving user ID.
  */
 import type { User } from "../../features/team/types/user";
 import type {
@@ -22,7 +17,7 @@ export class LocalStorageUserRepository implements UserRepository {
     return getItem<User[]>(STORAGE_KEYS.USERS) ?? [];
   }
 
-  async getUserById(id: string): Promise<User | null> {
+  async getUserById(id: number): Promise<User | null> {
     const users = await this.getUsers();
 
     return users.find((user) => user.id === id) ?? null;
@@ -31,8 +26,9 @@ export class LocalStorageUserRepository implements UserRepository {
   async createUser(data: CreateUserRequest): Promise<User> {
     const users = await this.getUsers();
 
+    const maxId = users.reduce((max, u) => (u.id > max ? u.id : max), 0);
     const user: User = {
-      id: crypto.randomUUID(),
+      id: maxId + 1,
       ...data,
     };
 
@@ -42,7 +38,7 @@ export class LocalStorageUserRepository implements UserRepository {
   }
 
   async updateUser(
-    id: string,
+    id: number,
     data: UpdateUserRequest,
   ): Promise<User> {
     const users = await this.getUsers();
@@ -66,7 +62,7 @@ export class LocalStorageUserRepository implements UserRepository {
     return updatedUser;
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: number): Promise<void> {
     const users = await this.getUsers();
 
     setItem(

@@ -2,12 +2,6 @@
  * KanbanCard
  *
  * Story card item rendered inside Kanban column lists.
- *
- * Features:
- * - HTML5 Native Drag & Drop (`draggable`, `onDragStart`, `onDragEnd`).
- * - Transmits `story.id` via `e.dataTransfer.setData("text/plain", story.id)`.
- * - Status select dropdown allowing inline status updates directly from the card.
- * - Displays priority chip, story points badge, and assignee avatar with initial letter.
  */
 import {
   Avatar,
@@ -32,7 +26,7 @@ import type { User } from "../../team/types/user";
 
 interface KanbanCardProps {
   story: UserStory;
-  projectId: string;
+  projectId: number;
   assignee?: User;
   onStatusChange: (story: UserStory, updateData: UpdateStoryRequest) => Promise<void>;
 }
@@ -83,7 +77,7 @@ function KanbanCard({
         description: story.description,
         priority: story.priority,
         storyPoints: story.storyPoints,
-        assignedUserId: story.assignedUserId,
+        assignedUserId: story.assignedUserId ?? null,
         status: newStatus,
       });
     } finally {
@@ -96,8 +90,8 @@ function KanbanCard({
       variant="outlined"
       draggable
       onDragStart={(e) => {
-        // Attach story ID to drag data transfer object
-        e.dataTransfer.setData("text/plain", story.id);
+        // Attach story ID as string to drag data transfer object
+        e.dataTransfer.setData("text/plain", String(story.id));
         e.dataTransfer.effectAllowed = "move";
         setIsDragging(true);
       }}

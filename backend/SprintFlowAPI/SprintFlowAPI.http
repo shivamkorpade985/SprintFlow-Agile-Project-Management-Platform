@@ -1,0 +1,41 @@
+@SprintFlowAPI_HostAddress = http://localhost:5000
+
+### 1. Get all projects
+GET {{SprintFlowAPI_HostAddress}}/api/projects
+Accept: application/json
+
+###
+
+### 2. Create a new project
+POST {{SprintFlowAPI_HostAddress}}/api/projects
+Content-Type: application/json
+
+{
+  "name": "SprintFlow Core Platform",
+  "description": "Next-generation agile sprint planning and tracking platform with PostgreSQL BIGINT backend."
+}
+
+###
+
+### 3. Get project by ID (replace with created project numeric ID)
+@projectId = 1
+GET {{SprintFlowAPI_HostAddress}}/api/projects/{{projectId}}
+Accept: application/json
+
+###
+
+### 4. Update an existing project
+PUT {{SprintFlowAPI_HostAddress}}/api/projects/{{projectId}}
+Content-Type: application/json
+
+{
+  "name": "SprintFlow Core Platform (Updated)",
+  "description": "Updated project description with real-time kanban boards and story estimation."
+}
+
+###
+
+### 5. Delete a project
+DELETE {{SprintFlowAPI_HostAddress}}/api/projects/{{projectId}}
+
+###

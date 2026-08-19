@@ -1,21 +1,7 @@
 /**
  * ProjectTeamProvider
  *
- * Context Provider owning the project team members state for a specific `projectId`.
- *
- * Domain Model Relationship:
- * System User (UserRepository)
- *   ↓
- * Project Membership (ProjectMemberRepository: projectId, userId)
- *   ↓
- * Project Team Members (`members: User[]`)
- *   ↓
- * Story Assignees (In CreateStoryDialog / EditStoryDialog / KanbanCard / StoryCard)
- *
- * Responsibilities:
- * - Queries project memberships and resolves full `User` objects for the specified `projectId`.
- * - Exposes `members` list used across Team Page, Story Assignees, Kanban Board, and Dashboard.
- * - Handles `addMember` and `removeMember` operations, instantly refreshing team state.
+ * Context Provider owning the project team members state for a specific numeric `projectId`.
  */
 import {
   useCallback,
@@ -30,7 +16,7 @@ import { LocalStorageProjectMemberRepository } from "../../../repositories/local
 import { ProjectTeamContext } from "./projectTeamContext";
 
 interface ProjectTeamProviderProps {
-  projectId: string;
+  projectId: number;
   children: React.ReactNode;
 }
 
@@ -75,7 +61,7 @@ export function ProjectTeamProvider({
   }, [projectId]);
 
   const addMember = useCallback(
-    async (userId: string): Promise<void> => {
+    async (userId: number): Promise<void> => {
       try {
         setError(null);
 
@@ -94,7 +80,7 @@ export function ProjectTeamProvider({
   );
 
   const removeMember = useCallback(
-    async (userId: string): Promise<void> => {
+    async (userId: number): Promise<void> => {
       try {
         setError(null);
 

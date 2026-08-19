@@ -2,15 +2,6 @@
  * ProjectDashboardContent
  *
  * Primary dashboard view displaying project statistics, completion progress, recent stories, and team members.
- *
- * Derived Metrics Architecture:
- * - All dashboard values are dynamically derived from existing Providers (`useProjects`, `useStories`, `useProjectTeam`)
- *   rather than independently persisted dashboard state:
- *   - Total Stories: `stories.length`
- *   - Done Stories: `stories.filter(s => s.status === 'DONE').length`
- *   - Story Points Velocity: `completedStoryPoints` vs `totalStoryPoints`
- *   - Overall Progress Percentage: `(doneStories / totalStories) * 100`
- *   - Team Count: `members.length`
  */
 import {
   Alert,
@@ -56,7 +47,7 @@ import ProjectFormDialog from "./ProjectFormDialog";
 import DashboardStatCard from "./DashboardStatCard";
 
 interface ProjectDashboardContentProps {
-  projectId: string;
+  projectId: number;
 }
 
 const getPriorityColor = (

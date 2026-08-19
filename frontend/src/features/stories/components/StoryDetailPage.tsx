@@ -2,12 +2,6 @@
  * StoryDetailPage
  *
  * Detailed view for an individual user story (`/projects/:projectId/stories/:storyId`).
- *
- * Responsibilities:
- * - Mounts `StoriesProvider` and `ProjectTeamProvider` for the current `:projectId`.
- * - Resolves story matching `:storyId` from `stories` context.
- * - Displays full story details (Title, Status, Priority, Points, Assignee avatar/name, Created date, Description).
- * - Triggers deletion with confirmation modal and redirects back to backlog upon deletion.
  */
 import {
   Alert,
@@ -44,8 +38,8 @@ import { ProjectTeamProvider } from "../../team/context/ProjectTeamProvider";
 import { useProjectTeam } from "../../team/hooks/useProjectTeam";
 
 interface StoryDetailContentProps {
-  projectId: string;
-  storyId: string;
+  projectId: number;
+  storyId: number;
 }
 
 const getPriorityColor = (
@@ -332,7 +326,7 @@ function StoryDetailContent({ projectId, storyId }: StoryDetailContentProps) {
   );
 }
 
-function StoryDetailPageContent({ projectId, storyId }: { projectId: string; storyId: string }) {
+function StoryDetailPageContent({ projectId, storyId }: { projectId: number; storyId: number }) {
   return (
     <ProjectTeamProvider projectId={projectId}>
       <StoryDetailContent projectId={projectId} storyId={storyId} />
@@ -347,9 +341,21 @@ function StoryDetailPage() {
     return <Alert severity="error">Project ID or Story ID is missing.</Alert>;
   }
 
+  const numericProjectId = Number(projectId);
+  const numericStoryId = Number(storyId);
+
+  if (
+    Number.isNaN(numericProjectId) ||
+    numericProjectId <= 0 ||
+    Number.isNaN(numericStoryId) ||
+    numericStoryId <= 0
+  ) {
+    return <Alert severity="error">Invalid Project ID or Story ID specified.</Alert>;
+  }
+
   return (
-    <StoriesProvider projectId={projectId}>
-      <StoryDetailPageContent projectId={projectId} storyId={storyId} />
+    <StoriesProvider projectId={numericProjectId}>
+      <StoryDetailPageContent projectId={numericProjectId} storyId={numericStoryId} />
     </StoriesProvider>
   );
 }

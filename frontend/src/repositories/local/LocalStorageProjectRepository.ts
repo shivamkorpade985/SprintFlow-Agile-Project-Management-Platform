@@ -2,11 +2,6 @@
  * LocalStorageProjectRepository
  *
  * Client-side implementation of `ProjectRepository` backed by browser `localStorage`.
- *
- * Storage Details:
- * - Key: `STORAGE_KEYS.PROJECTS` ("sprintflow_projects")
- * - Generates unique client UUIDs (`crypto.randomUUID()`) for new projects.
- * - Handles read/write JSON serialization safely via typed `getItem` / `setItem` helpers.
  */
 import type { Project } from "../../features/projects/types/project";
 import type {
@@ -22,7 +17,7 @@ export class LocalStorageProjectRepository implements ProjectRepository {
     return getItem<Project[]>(STORAGE_KEYS.PROJECTS) ?? [];
   }
 
-  async getProjectById(id: string): Promise<Project | null> {
+  async getProjectById(id: number): Promise<Project | null> {
     const projects = await this.getProjects();
 
     return projects.find((project) => project.id === id) ?? null;
@@ -31,8 +26,9 @@ export class LocalStorageProjectRepository implements ProjectRepository {
   async createProject(data: CreateProjectRequest): Promise<Project> {
     const projects = await this.getProjects();
 
+    const maxId = projects.reduce((max, p) => (p.id > max ? p.id : max), 0);
     const project: Project = {
-      id: crypto.randomUUID(),
+      id: maxId + 1,
       ...data,
     };
 
@@ -42,7 +38,7 @@ export class LocalStorageProjectRepository implements ProjectRepository {
   }
 
   async updateProject(
-    id: string,
+    id: number,
     data: UpdateProjectRequest,
   ): Promise<Project> {
     const projects = await this.getProjects();
@@ -68,7 +64,7 @@ export class LocalStorageProjectRepository implements ProjectRepository {
     return updatedProject;
   }
 
-  async deleteProject(id: string): Promise<void> {
+  async deleteProject(id: number): Promise<void> {
     const projects = await this.getProjects();
 
     setItem(

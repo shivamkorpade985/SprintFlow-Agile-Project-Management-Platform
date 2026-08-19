@@ -2,12 +2,6 @@
  * AddMemberDialog
  *
  * Modal dialog for assigning existing system users to a project team.
- *
- * Architecture & Features:
- * - Queries unassigned system users (`availableUsers = users.filter(...)`).
- * - Displays a live attribute preview card of the selected user.
- * - Visual Avatar Palette Grid (`AVATAR_OPTIONS`): Displays color circles containing the user's initial letter.
- * - `handleSubmit`: Updates user's avatar color in `UserRepository` and adds project membership in `ProjectMemberRepository`.
  */
 import {
   Alert,
@@ -36,9 +30,9 @@ import type { User } from "../types/user";
 
 interface AddMemberDialogProps {
   open: boolean;
-  existingMemberIds: string[];
+  existingMemberIds: number[];
   onClose: () => void;
-  onAdd: (userId: string) => Promise<void>;
+  onAdd: (userId: number) => Promise<void>;
 }
 
 const userRepository = new LocalStorageUserRepository();
@@ -96,11 +90,12 @@ function AddMemberDialog({
     (user) => !existingMemberIds.includes(user.id),
   );
 
-  const selectedUser = users.find((user) => user.id === selectedUserId);
+  const selectedNumericId = selectedUserId ? Number(selectedUserId) : null;
+  const selectedUser = users.find((user) => user.id === selectedNumericId);
 
-  const handleSelectUser = (userId: string) => {
-    setSelectedUserId(userId);
-    const user = users.find((u) => u.id === userId);
+  const handleSelectUser = (userIdStr: string) => {
+    setSelectedUserId(userIdStr);
+    const user = users.find((u) => u.id === Number(userIdStr));
     setSelectedAvatar(user?.avatar || AVATAR_OPTIONS[0].color);
   };
 
@@ -135,7 +130,7 @@ function AddMemberDialog({
         });
       }
 
-      await onAdd(selectedUserId);
+      await onAdd(selectedUser.id);
 
       handleClose();
     } catch {
@@ -175,7 +170,7 @@ function AddMemberDialog({
                   disabled={isLoadingUsers || isSubmitting}
                 >
                   {availableUsers.map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
+                    <MenuItem key={user.id} value={String(user.id)}>
                       {user.name} — {user.role}
                     </MenuItem>
                   ))}

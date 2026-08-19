@@ -2,12 +2,6 @@
  * LocalStorageStoryRepository
  *
  * Client-side implementation of `StoryRepository` backed by browser `localStorage`.
- *
- * Storage Details:
- * - Key: `STORAGE_KEYS.STORIES` ("sprintflow_stories")
- * - `getStoriesByProject`: Filters global stories array by `story.projectId`.
- * - `createStory`: Automatically injects `id` (UUID) and `createdAt` (ISO timestamp).
- * - `updateStory`: Merges update payload while preserving `id`, `projectId`, and `createdAt`.
  */
 import type { UserStory } from "../../features/stories/types/story";
 import type {
@@ -18,11 +12,9 @@ import { STORAGE_KEYS } from "../../constants/storageKeys";
 import { getItem, setItem } from "../../storage/localStorage";
 import type { StoryRepository } from "../StoryRepository";
 
-export class LocalStorageStoryRepository
-  implements StoryRepository
-{
+export class LocalStorageStoryRepository implements StoryRepository {
   async getStoriesByProject(
-    projectId: string,
+    projectId: number,
   ): Promise<UserStory[]> {
     const stories =
       getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
@@ -33,7 +25,7 @@ export class LocalStorageStoryRepository
   }
 
   async getStoryById(
-    id: string,
+    id: number,
   ): Promise<UserStory | null> {
     const stories =
       getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
@@ -49,8 +41,9 @@ export class LocalStorageStoryRepository
     const stories =
       getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
 
+    const maxId = stories.reduce((max, s) => (s.id > max ? s.id : max), 0);
     const story: UserStory = {
-      id: crypto.randomUUID(),
+      id: maxId + 1,
       createdAt: new Date().toISOString(),
       ...data,
     };
@@ -64,7 +57,7 @@ export class LocalStorageStoryRepository
   }
 
   async updateStory(
-    id: string,
+    id: number,
     data: UpdateStoryRequest,
   ): Promise<UserStory> {
     const stories =
@@ -93,7 +86,7 @@ export class LocalStorageStoryRepository
     return updatedStory;
   }
 
-  async deleteStory(id: string): Promise<void> {
+  async deleteStory(id: number): Promise<void> {
     const stories =
       getItem<UserStory[]>(STORAGE_KEYS.STORIES) ?? [];
 

@@ -2,16 +2,6 @@
  * StoriesPage
  *
  * Backlog & user story management view (`/projects/:projectId/stories`).
- *
- * Responsibilities:
- * - Wraps content in `ProjectTeamProvider` and `StoriesProvider`.
- * - Restricts story assignee creation/editing options strictly to current project team members (`members`).
- * - URL Search Parameter Filter Synchronization (`useSearchParams`):
- *   - Search (`search=...`): Title term filtering.
- *   - Assignee (`assignee=...`): Project team member ID or UNASSIGNED.
- *   - Priority (`priority=...`): HIGH / MEDIUM / LOW.
- *   - My Tasks (`myTasks=true`): Filter by current user.
- * - Benefits of URL state: Browser refresh and back/forward navigation preserve active filters naturally.
  */
 import {
   Alert,
@@ -38,7 +28,7 @@ import StoryCard from "./StoryCard";
 import StoryFilters from "./StoryFilters";
 
 interface StoriesContentProps {
-  projectId: string;
+  projectId: number;
 }
 
 function StoriesContent({ projectId }: StoriesContentProps) {
@@ -87,7 +77,8 @@ function StoriesContent({ projectId }: StoriesContentProps) {
       if (assigneeParam === "UNASSIGNED") {
         if (story.assignedUserId) return false;
       } else {
-        if (story.assignedUserId !== assigneeParam) return false;
+        const numericAssigneeId = Number(assigneeParam);
+        if (story.assignedUserId !== numericAssigneeId) return false;
       }
     }
 
@@ -244,13 +235,18 @@ function StoriesPage() {
   }>();
 
   if (!projectId) {
-    return <Typography color="error">Project ID is missing.</Typography>;
+    return <Alert severity="error">Project ID is missing.</Alert>;
+  }
+
+  const numericProjectId = Number(projectId);
+  if (Number.isNaN(numericProjectId) || numericProjectId <= 0) {
+    return <Alert severity="error">Invalid Project ID specified.</Alert>;
   }
 
   return (
-    <ProjectTeamProvider projectId={projectId}>
-      <StoriesProvider projectId={projectId}>
-        <StoriesContent projectId={projectId} />
+    <ProjectTeamProvider projectId={numericProjectId}>
+      <StoriesProvider projectId={numericProjectId}>
+        <StoriesContent projectId={numericProjectId} />
       </StoriesProvider>
     </ProjectTeamProvider>
   );

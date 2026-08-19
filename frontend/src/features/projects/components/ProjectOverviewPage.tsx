@@ -2,10 +2,6 @@
  * ProjectOverviewPage
  *
  * Overview and dashboard metrics page for an active project (`/projects/:projectId`).
- *
- * Responsibilities:
- * - Reads `:projectId` parameter from URL.
- * - Wraps `ProjectDashboardContent` with `StoriesProvider` and `ProjectTeamProvider`.
  */
 import { Alert } from "@mui/material";
 import { useParams } from "react-router";
@@ -21,10 +17,15 @@ function ProjectOverviewPage() {
     return <Alert severity="error">Project ID is missing.</Alert>;
   }
 
+  const numericProjectId = Number(projectId);
+  if (Number.isNaN(numericProjectId) || numericProjectId <= 0) {
+    return <Alert severity="error">Invalid Project ID specified.</Alert>;
+  }
+
   return (
-    <StoriesProvider projectId={projectId}>
-      <ProjectTeamProvider projectId={projectId}>
-        <ProjectDashboardContent projectId={projectId} />
+    <StoriesProvider projectId={numericProjectId}>
+      <ProjectTeamProvider projectId={numericProjectId}>
+        <ProjectDashboardContent projectId={numericProjectId} />
       </ProjectTeamProvider>
     </StoriesProvider>
   );

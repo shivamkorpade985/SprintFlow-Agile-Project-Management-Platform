@@ -1,27 +1,7 @@
 /**
  * StoriesProvider
  *
- * Context Provider owning project-scoped user stories state for a given `projectId`.
- *
- * Data Architecture & Flow:
- * Component (KanbanBoardView / StoriesPage / StoryDetailPage)
- *   ↓
- * useStories()
- *   ↓
- * StoriesContext
- *   ↓
- * StoriesProvider (projectId)
- *   ↓
- * StoryRepository (LocalStorageStoryRepository)
- *   ↓
- * localStorage
- *
- * Scope: Per-project (Mounted on project-specific story routes).
- *
- * Key Behaviors:
- * - Single source of truth for all story views (Kanban board, Stories backlog, Story Detail).
- * - Story status changes triggered via drag-and-drop or dropdown select update state through `updateStory()`.
- * - State mutations synchronously update React state upon repository success, ensuring all views remain 100% in sync.
+ * Context Provider owning project-scoped user stories state for a given numeric `projectId`.
  */
 import {
   useCallback,
@@ -40,7 +20,7 @@ import { LocalStorageStoryRepository } from "../../../repositories/local/LocalSt
 import { StoriesContext } from "./storiesContext";
 
 interface StoriesProviderProps {
-  projectId: string;
+  projectId: number;
   children: React.ReactNode;
 }
 
@@ -105,7 +85,7 @@ export function StoriesProvider({
 
   const updateStory = useCallback(
     async (
-      id: string,
+      id: number,
       data: UpdateStoryRequest,
     ): Promise<UserStory> => {
       try {
@@ -135,7 +115,7 @@ export function StoriesProvider({
   );
 
   const deleteStory = useCallback(
-    async (id: string): Promise<void> => {
+    async (id: number): Promise<void> => {
       try {
         setError(null);
 

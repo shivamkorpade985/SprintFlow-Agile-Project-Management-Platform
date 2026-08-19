@@ -2,11 +2,6 @@
  * UserDetailPage
  *
  * Profile view for an individual system user (`/projects/:projectId/team/:userId`).
- *
- * Responsibilities:
- * - Reads `:userId` from route parameters.
- * - Queries system-wide user details via `UserRepository.getUserById(userId)`.
- * - Displays user avatar circle with initial letter, name, system ID, and assigned role.
  */
 import {
   Alert,
@@ -42,14 +37,17 @@ function UserDetailPage() {
 
   const navigate = useNavigate();
 
+  const numericUserId = userId ? Number(userId) : NaN;
+  const isInvalidUserId = !userId || Number.isNaN(numericUserId) || numericUserId <= 0;
+
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(Boolean(userId));
+  const [isLoading, setIsLoading] = useState(!isInvalidUserId);
   const [error, setError] = useState<string | null>(
-    userId ? null : "User ID is missing.",
+    isInvalidUserId ? "Invalid or missing User ID." : null,
   );
 
   useEffect(() => {
-    if (!userId) {
+    if (isInvalidUserId) {
       return;
     }
 
@@ -57,7 +55,7 @@ function UserDetailPage() {
 
     const loadUser = async () => {
       try {
-        const data = await userRepository.getUserById(userId);
+        const data = await userRepository.getUserById(numericUserId);
 
         if (isMounted) {
           if (!data) {
@@ -82,17 +80,17 @@ function UserDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [userId]);
+  }, [numericUserId, isInvalidUserId]);
 
   const handleBackToTeam = () => {
     navigate(projectId ? `/projects/${projectId}/team` : "/projects");
   };
 
-  if (!userId) {
+  if (isInvalidUserId) {
     return (
       <Box sx={{ maxWidth: 800, mx: "auto" }}>
         <Alert severity="error" sx={{ mb: 2 }}>
-          User ID is missing.
+          {error ?? "Invalid or missing User ID."}
         </Alert>
 
         <Button variant="outlined" onClick={handleBackToTeam}>

@@ -2,11 +2,6 @@
  * StoryFilters
  *
  * Filter toolbar component for searching and refining the user story backlog list.
- *
- * State Mechanism:
- * - Operates entirely through URL query parameters using React Router's `useSearchParams`.
- * - `updateParam`: Updates matching URL search key (`search`, `assignee`, `priority`) immutably.
- * - Why URL params over local React state: Users can refresh the page or share the URL with filters intact.
  */
 import {
   Box,
@@ -150,7 +145,7 @@ export default function StoryFilters({
               <MenuItem value="ALL">All Team Members</MenuItem>
               <MenuItem value="UNASSIGNED">Unassigned</MenuItem>
               {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
+                <MenuItem key={user.id} value={String(user.id)}>
                   {user.name} ({user.role})
                 </MenuItem>
               ))}
@@ -247,7 +242,7 @@ export default function StoryFilters({
                   label={`Assignee: ${
                     assigneeParam === "UNASSIGNED"
                       ? "Unassigned"
-                      : users.find((u) => u.id === assigneeParam)?.name || assigneeParam
+                      : users.find((u) => u.id === Number(assigneeParam))?.name || assigneeParam
                   }`}
                   onDelete={() => updateParam("assignee", "ALL")}
                 />

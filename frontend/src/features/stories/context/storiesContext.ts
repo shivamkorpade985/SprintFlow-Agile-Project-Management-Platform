@@ -1,9 +1,7 @@
 /**
  * StoriesContext
  *
- * Contract defining the context value exposed by `StoriesProvider`.
- *
- * Components consume this context via `useStories()` custom hook.
+ * Defines the React Context contract for managing project-scoped User Story state.
  */
 import { createContext } from "react";
 import type { UserStory } from "../types/story";
@@ -24,11 +22,11 @@ export interface StoriesContextValue {
   ) => Promise<UserStory>;
 
   updateStory: (
-    id: string,
+    id: number,
     data: UpdateStoryRequest,
   ) => Promise<UserStory>;
 
-  deleteStory: (id: string) => Promise<void>;
+  deleteStory: (id: number) => Promise<void>;
 }
 
 export const StoriesContext =

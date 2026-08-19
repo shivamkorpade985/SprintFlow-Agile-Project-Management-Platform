@@ -2,21 +2,6 @@
  * KanbanBoardView
  *
  * Presentation layer for the 4-stage project Kanban board (Backlog, In Progress, Testing, Done).
- *
- * Single Source of Truth Architecture:
- * - Does NOT maintain a duplicate local copy of story state or a custom `BoardProvider`.
- * - Columns (`KANBAN_COLUMNS`) are dynamically derived by filtering `stories` from `StoriesProvider` by `StoryStatus`.
- *
- * Drag and Drop Workflow:
- * User Drags KanbanCard
- *   ↓ HTML5 e.dataTransfer.setData("text/plain", story.id)
- * User Drops Card on Target Column (KanbanBoardView column paper)
- *   ↓ onDrop triggers handleDrop(storyId, targetStatus)
- * updateStory(story.id, { ...story, status: targetStatus })
- *   ↓
- * StoriesProvider updates state & LocalStorageStoryRepository persists change
- *   ↓
- * All subscribers re-render automatically
  */
 import {
   Alert,
@@ -40,7 +25,7 @@ import type { UpdateStoryRequest } from "../../stories/types/contracts/story";
 import KanbanCard from "./KanbanCard";
 
 interface KanbanBoardViewProps {
-  projectId: string;
+  projectId: number;
 }
 
 interface ColumnDefinition {
@@ -73,9 +58,14 @@ function KanbanBoardView({ projectId }: KanbanBoardViewProps) {
   };
 
   // Drop event handler for moving story cards between Kanban columns
-  const handleDrop = async (storyId: string, targetStatus: StoryStatus) => {
+  const handleDrop = async (storyIdStr: string, targetStatus: StoryStatus) => {
     setDraggedOverColumn(null);
-    const story = stories.find((s) => s.id === storyId);
+    const numericStoryId = Number(storyIdStr);
+    if (Number.isNaN(numericStoryId)) {
+      return;
+    }
+
+    const story = stories.find((s) => s.id === numericStoryId);
     if (!story || story.status === targetStatus) {
       return;
     }

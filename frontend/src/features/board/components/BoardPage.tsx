@@ -2,11 +2,6 @@
  * BoardPage
  *
  * Page component for the interactive project Kanban Board (`/projects/:projectId/board`).
- *
- * Responsibilities:
- * - Reads `:projectId` parameter from URL.
- * - Wraps `KanbanBoardView` with `StoriesProvider` (for story lifecycle & drag updates)
- *   and `ProjectTeamProvider` (for resolving story assignee names and avatars).
  */
 import { Alert } from "@mui/material";
 import { useParams } from "react-router";
@@ -22,10 +17,15 @@ function BoardPage() {
     return <Alert severity="error">Project ID is missing.</Alert>;
   }
 
+  const numericProjectId = Number(projectId);
+  if (Number.isNaN(numericProjectId) || numericProjectId <= 0) {
+    return <Alert severity="error">Invalid Project ID specified.</Alert>;
+  }
+
   return (
-    <StoriesProvider projectId={projectId}>
-      <ProjectTeamProvider projectId={projectId}>
-        <KanbanBoardView projectId={projectId} />
+    <StoriesProvider projectId={numericProjectId}>
+      <ProjectTeamProvider projectId={numericProjectId}>
+        <KanbanBoardView projectId={numericProjectId} />
       </ProjectTeamProvider>
     </StoriesProvider>
   );

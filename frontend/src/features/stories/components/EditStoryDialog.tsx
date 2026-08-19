@@ -2,12 +2,6 @@
  * EditStoryDialog
  *
  * Modal dialog for modifying existing user story details.
- *
- * Key Behaviors:
- * - Initializes state from current `story` target entity.
- * - Handles edge case where a story's assigned user is no longer a member of the project team:
- *   Renders fallback option `<MenuItem value={form.assignedUserId} disabled>Former member</MenuItem>`.
- * - Restricts new assignee selections strictly to active project team members.
  */
 import {
   Alert,
@@ -55,7 +49,7 @@ function getInitialFormState(
     priority: story.priority,
     storyPoints: String(story.storyPoints),
     status: story.status,
-    assignedUserId: story.assignedUserId ?? "",
+    assignedUserId: story.assignedUserId != null ? String(story.assignedUserId) : "",
   };
 }
 
@@ -129,12 +123,7 @@ function EditStoryForm({
         priority: form.priority,
         storyPoints: parsedStoryPoints,
         status: form.status,
-        ...(form.assignedUserId
-          ? {
-              assignedUserId:
-                form.assignedUserId,
-            }
-          : {}),
+        assignedUserId: form.assignedUserId ? Number(form.assignedUserId) : null,
       });
 
       onClose();
@@ -289,7 +278,7 @@ function EditStoryForm({
 
             {/* Handle former team member fallback if assigned user was removed from project team */}
             {form.assignedUserId &&
-              !users.some((user) => user.id === form.assignedUserId) && (
+              !users.some((user) => String(user.id) === form.assignedUserId) && (
                 <MenuItem value={form.assignedUserId} disabled>
                   Former member
                 </MenuItem>
@@ -303,7 +292,7 @@ function EditStoryForm({
               users.map((user) => (
                 <MenuItem
                   key={user.id}
-                  value={user.id}
+                  value={String(user.id)}
                 >
                   {user.name} — {user.role}
                 </MenuItem>

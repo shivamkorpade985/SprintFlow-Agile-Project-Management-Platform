@@ -2,12 +2,6 @@
  * TeamPage
  *
  * Project team management view (`/projects/:projectId/team`).
- *
- * Responsibilities:
- * - Mounts `ProjectTeamProvider` for `:projectId`.
- * - Displays grid of assigned project team members with role badges and initial-letter avatars.
- * - Navigates to user profile (`/projects/:projectId/team/:userId`) on member click.
- * - Handles adding new team members (`AddMemberDialog`) and removing members (`removeMember`).
  */
 import {
   Alert,
@@ -47,11 +41,14 @@ const getRoleChipColor = (role: string): "primary" | "secondary" | "info" | "def
   }
 };
 
-function TeamContent() {
+interface TeamContentProps {
+  projectId: number;
+}
+
+function TeamContent({ projectId }: TeamContentProps) {
   const { members, isLoading, error, addMember, removeMember } = useProjectTeam();
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const navigate = useNavigate();
-  const { projectId } = useParams<{ projectId: string }>();
 
   if (isLoading) {
     return (
@@ -147,9 +144,7 @@ function TeamContent() {
                             whiteSpace: "nowrap",
                           }}
                           onClick={() => {
-                            if (projectId) {
-                              navigate(`/projects/${projectId}/team/${member.id}`);
-                            }
+                            navigate(`/projects/${projectId}/team/${member.id}`);
                           }}
                         >
                           {member.name}
@@ -209,9 +204,14 @@ function TeamPage() {
     return <Alert severity="error">Project ID is missing.</Alert>;
   }
 
+  const numericProjectId = Number(projectId);
+  if (Number.isNaN(numericProjectId) || numericProjectId <= 0) {
+    return <Alert severity="error">Invalid Project ID specified.</Alert>;
+  }
+
   return (
-    <ProjectTeamProvider projectId={projectId}>
-      <TeamContent />
+    <ProjectTeamProvider projectId={numericProjectId}>
+      <TeamContent projectId={numericProjectId} />
     </ProjectTeamProvider>
   );
 }

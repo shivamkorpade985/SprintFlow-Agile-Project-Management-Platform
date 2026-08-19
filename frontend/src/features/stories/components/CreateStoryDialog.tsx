@@ -2,12 +2,6 @@
  * CreateStoryDialog
  *
  * Dialog modal for creating a new user story.
- *
- * Responsibilities:
- * - Collects title, description, priority, story points, status, and assignee.
- * - Restricts assignees strictly to the project team members (`users` prop passed from `ProjectTeamProvider`).
- * - Validates input fields (non-empty strings, positive integer story points).
- * - Invokes `createStory` contract via `useStories()` hook.
  */
 import {
   Alert,
@@ -31,7 +25,7 @@ import type { User } from "../../team/types/user";
 
 interface CreateStoryDialogProps {
   open: boolean;
-  projectId: string;
+  projectId: number;
   users: User[];
   onClose: () => void;
 }
@@ -112,9 +106,7 @@ function CreateStoryDialog({
         priority,
         storyPoints: parsedStoryPoints,
         status,
-        ...(assignedUserId
-          ? { assignedUserId }
-          : {}),
+        assignedUserId: assignedUserId ? Number(assignedUserId) : null,
       });
 
       handleClose();
@@ -270,7 +262,7 @@ function CreateStoryDialog({
               users.map((user) => (
                 <MenuItem
                   key={user.id}
-                  value={user.id}
+                  value={String(user.id)}
                 >
                   {user.name} — {user.role}
                 </MenuItem>

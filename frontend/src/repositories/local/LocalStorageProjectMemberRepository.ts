@@ -2,12 +2,6 @@
  * LocalStorageProjectMemberRepository
  *
  * Client-side implementation of `ProjectMemberRepository` backed by `localStorage`.
- *
- * Storage Details:
- * - Key: `STORAGE_KEYS.PROJECT_MEMBERS` ("sprintflow_project_members")
- * - `getMembers`: Filters global membership records by `projectId`.
- * - `addMember`: Prevents duplicate `(projectId, userId)` membership records.
- * - `removeMember`: Removes matching `(projectId, userId)` association.
  */
 import type { ProjectMember } from "../../features/team/types/projectMember";
 import { STORAGE_KEYS } from "../../constants/storageKeys";
@@ -18,7 +12,7 @@ export class LocalStorageProjectMemberRepository
   implements ProjectMemberRepository
 {
   async getMembers(
-    projectId: string,
+    projectId: number,
   ): Promise<ProjectMember[]> {
     const memberships =
       getItem<ProjectMember[]>(
@@ -32,8 +26,8 @@ export class LocalStorageProjectMemberRepository
   }
 
   async addMember(
-    projectId: string,
-    userId: string,
+    projectId: number,
+    userId: number,
   ): Promise<ProjectMember> {
     const memberships =
       getItem<ProjectMember[]>(
@@ -64,8 +58,8 @@ export class LocalStorageProjectMemberRepository
   }
 
   async removeMember(
-    projectId: string,
-    userId: string,
+    projectId: number,
+    userId: number,
   ): Promise<void> {
     const memberships =
       getItem<ProjectMember[]>(

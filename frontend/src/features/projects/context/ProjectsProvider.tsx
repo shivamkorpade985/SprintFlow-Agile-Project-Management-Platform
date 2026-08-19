@@ -2,27 +2,6 @@
  * ProjectsProvider
  *
  * Global Context Provider owning the workspace-level projects collection.
- *
- * Data Flow:
- * Component
- *   ↓
- * useProjects()
- *   ↓
- * ProjectsContext
- *   ↓
- * ProjectsProvider
- *   ↓
- * ProjectRepository (LocalStorageProjectRepository)
- *   ↓
- * localStorage
- *
- * Scope: Global (Mounted in `AppLayout` around all workspace routes).
- *
- * Responsibilities:
- * - Fetches and stores the list of all projects on mount.
- * - Exposes state: `projects`, `isLoading`, `error`.
- * - Exposes mutation methods: `createProject`, `updateProject`, `deleteProject`, `refreshProjects`.
- * - Updates local React state immutably upon repository success to keep all subscribers synchronized.
  */
 import { useCallback, useEffect, useState } from "react";
 import type { Project } from "../types/project";
@@ -61,30 +40,30 @@ export function ProjectsProvider({
   }, []);
 
   const createProject = useCallback(
-  async (data: CreateProjectRequest): Promise<Project> => {
-    try {
-      setError(null);
+    async (data: CreateProjectRequest): Promise<Project> => {
+      try {
+        setError(null);
 
-      const createdProject =
-        await projectRepository.createProject(data);
+        const createdProject =
+          await projectRepository.createProject(data);
 
-      setProjects((currentProjects) => [
-        ...currentProjects,
-        createdProject,
-      ]);
+        setProjects((currentProjects) => [
+          ...currentProjects,
+          createdProject,
+        ]);
 
-      return createdProject;
-    } catch {
-      setError("Failed to create project.");
-      throw new Error("Failed to create project.");
-    }
-  },
-  [],
-);
+        return createdProject;
+      } catch {
+        setError("Failed to create project.");
+        throw new Error("Failed to create project.");
+      }
+    },
+    [],
+  );
 
-    const updateProject = useCallback(
+  const updateProject = useCallback(
     async (
-      id: string,
+      id: number,
       data: UpdateProjectRequest,
     ): Promise<Project> => {
       try {
@@ -109,7 +88,7 @@ export function ProjectsProvider({
   );
 
   const deleteProject = useCallback(
-    async (id: string): Promise<void> => {
+    async (id: number): Promise<void> => {
       try {
         setError(null);
 
@@ -157,14 +136,14 @@ export function ProjectsProvider({
   return (
     <ProjectsContext.Provider
       value={{
-      projects,
-      isLoading,
-      error,
-      refreshProjects,
-      createProject,
-      updateProject,
-      deleteProject,
-}}
+        projects,
+        isLoading,
+        error,
+        refreshProjects,
+        createProject,
+        updateProject,
+        deleteProject,
+      }}
     >
       {children}
     </ProjectsContext.Provider>

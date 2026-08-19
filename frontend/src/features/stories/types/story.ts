@@ -10,13 +10,13 @@ export type StoryStatus =
   | "DONE";
 
 export interface UserStory {
-  id: string;
-  projectId: string;
+  id: number;
+  projectId: number;
   title: string;
   description: string;
   priority: StoryPriority;
   storyPoints: number;
-  assignedUserId?: string;
+  assignedUserId?: number | null;
   status: StoryStatus;
   createdAt: string;
 }

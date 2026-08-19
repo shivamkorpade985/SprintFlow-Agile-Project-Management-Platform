@@ -2,10 +2,6 @@
  * StoryCard
  *
  * Card component for displaying individual user stories within the backlog listing (`StoriesPage`).
- *
- * Responsibilities:
- * - Renders story title, description snippet, status, priority badge, points, and assignee avatar.
- * - Delegates editing (`onEdit`) and deletion (`onDelete`) actions to parent container component.
  */
 import {
   Avatar,
@@ -28,7 +24,7 @@ import type { User } from "../../team/types/user";
 
 interface StoryCardProps {
   story: UserStory;
-  projectId: string;
+  projectId: number;
   assignee?: User;
   onEdit: (story: UserStory) => void;
   onDelete: (story: UserStory) => void;

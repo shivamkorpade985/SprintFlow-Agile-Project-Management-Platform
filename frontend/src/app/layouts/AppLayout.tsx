@@ -56,10 +56,13 @@ function AppLayoutContent() {
   const location = useLocation();
   const params = useParams<{ projectId?: string }>();
   const projectId = params.projectId;
+  const numericProjectId = projectId ? Number(projectId) : NaN;
 
   // Consume projects state to resolve current project name for sidebar and top breadcrumbs
   const { projects } = useProjects();
-  const currentProject = projects.find((p) => p.id === projectId);
+  const currentProject = !Number.isNaN(numericProjectId)
+    ? projects.find((p) => p.id === numericProjectId)
+    : undefined;
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
