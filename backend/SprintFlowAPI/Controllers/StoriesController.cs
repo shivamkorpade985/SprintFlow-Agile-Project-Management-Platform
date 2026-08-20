@@ -14,12 +14,10 @@ namespace SprintFlowAPI.Controllers;
 public class StoriesController : ControllerBase
 {
     private readonly IStoryService _storyService;
-    private readonly ILogger<StoriesController> _logger;
 
-    public StoriesController(IStoryService storyService, ILogger<StoriesController> logger)
+    public StoriesController(IStoryService storyService)
     {
         _storyService = storyService ?? throw new ArgumentNullException(nameof(storyService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     // ============================================================================

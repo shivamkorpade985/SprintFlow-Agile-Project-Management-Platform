@@ -10,19 +10,14 @@ import {
 } from "react";
 
 import type { User } from "../types/user";
-import { LocalStorageUserRepository } from "../../../repositories/local/LocalStorageUserRepository";
-import { LocalStorageProjectMemberRepository } from "../../../repositories/local/LocalStorageProjectMemberRepository";
-
+import { userRepository } from "../userRepository";
+import { projectMemberRepository } from "../projectMemberRepository";
 import { ProjectTeamContext } from "./projectTeamContext";
 
 interface ProjectTeamProviderProps {
   projectId: number;
   children: React.ReactNode;
 }
-
-const userRepository = new LocalStorageUserRepository();
-const projectMemberRepository =
-  new LocalStorageProjectMemberRepository();
 
 export function ProjectTeamProvider({
   projectId,
@@ -53,8 +48,10 @@ export function ProjectTeamProvider({
       );
 
       setMembers(projectMembers);
-    } catch {
-      setError("Failed to load project team.");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load project team.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -71,9 +68,11 @@ export function ProjectTeamProvider({
         );
 
         await refreshMembers();
-      } catch {
-        setError("Failed to add team member.");
-        throw new Error("Failed to add team member.");
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to add team member.";
+        setError(message);
+        throw new Error(message, { cause: err });
       }
     },
     [projectId, refreshMembers],
@@ -90,9 +89,11 @@ export function ProjectTeamProvider({
         );
 
         await refreshMembers();
-      } catch {
-        setError("Failed to remove team member.");
-        throw new Error("Failed to remove team member.");
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to remove team member.";
+        setError(message);
+        throw new Error(message, { cause: err });
       }
     },
     [projectId, refreshMembers],
@@ -121,9 +122,11 @@ export function ProjectTeamProvider({
         if (isMounted) {
           setMembers(projectMembers);
         }
-      } catch {
+      } catch (err) {
         if (isMounted) {
-          setError("Failed to load project team.");
+          const message =
+            err instanceof Error ? err.message : "Failed to load project team.";
+          setError(message);
         }
       } finally {
         if (isMounted) {

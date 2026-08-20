@@ -24,7 +24,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useEffect, useState } from "react";
 
-import { LocalStorageUserRepository } from "../../../repositories/local/LocalStorageUserRepository";
+import { userRepository } from "../userRepository";
 import { AVATAR_OPTIONS } from "../constants/avatars";
 import type { User } from "../types/user";
 
@@ -34,8 +34,6 @@ interface AddMemberDialogProps {
   onClose: () => void;
   onAdd: (userId: number) => Promise<void>;
 }
-
-const userRepository = new LocalStorageUserRepository();
 
 function AddMemberDialog({
   open,
@@ -67,9 +65,11 @@ function AddMemberDialog({
         if (isMounted) {
           setUsers(data);
         }
-      } catch {
+      } catch (err) {
         if (isMounted) {
-          setError("Failed to load users.");
+          const message =
+            err instanceof Error ? err.message : "Failed to load users.";
+          setError(message);
         }
       } finally {
         if (isMounted) {
@@ -133,8 +133,10 @@ function AddMemberDialog({
       await onAdd(selectedUser.id);
 
       handleClose();
-    } catch {
-      setError("Failed to add team member.");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to add team member.";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

@@ -24,10 +24,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { LocalStorageUserRepository } from "../../../repositories/local/LocalStorageUserRepository";
+import { userRepository } from "../userRepository";
 import type { User } from "../types/user";
-
-const userRepository = new LocalStorageUserRepository();
 
 function UserDetailPage() {
   const { projectId, userId } = useParams<{
@@ -64,9 +62,11 @@ function UserDetailPage() {
             setUser(data);
           }
         }
-      } catch {
+      } catch (err) {
         if (isMounted) {
-          setError("Failed to load user.");
+          const message =
+            err instanceof Error ? err.message : "Failed to load user.";
+          setError(message);
         }
       } finally {
         if (isMounted) {

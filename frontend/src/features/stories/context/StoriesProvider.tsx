@@ -15,17 +15,13 @@ import type {
   UpdateStoryRequest,
 } from "../types/contracts/story";
 
-import { LocalStorageStoryRepository } from "../../../repositories/local/LocalStorageStoryRepository";
-
+import { storyRepository } from "../storyRepository";
 import { StoriesContext } from "./storiesContext";
 
 interface StoriesProviderProps {
   projectId: number;
   children: React.ReactNode;
 }
-
-const storyRepository =
-  new LocalStorageStoryRepository();
 
 export function StoriesProvider({
   projectId,
@@ -52,8 +48,10 @@ export function StoriesProvider({
         );
 
       setStories(data);
-    } catch {
-      setError("Failed to load stories.");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load stories.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -75,9 +73,11 @@ export function StoriesProvider({
         ]);
 
         return createdStory;
-      } catch {
-        setError("Failed to create story.");
-        throw new Error("Failed to create story.");
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to create story.";
+        setError(message);
+        throw new Error(message, { cause: err });
       }
     },
     [],
@@ -100,15 +100,22 @@ export function StoriesProvider({
         setStories((currentStories) =>
           currentStories.map((story) =>
             story.id === id
-              ? updatedStory
+              ? {
+                  ...story,
+                  ...updatedStory,
+                  projectId: story.projectId,
+                  createdAt: story.createdAt,
+                }
               : story,
           ),
         );
 
         return updatedStory;
-      } catch {
-        setError("Failed to update story.");
-        throw new Error("Failed to update story.");
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to update story.";
+        setError(message);
+        throw new Error(message, { cause: err });
       }
     },
     [],
@@ -126,9 +133,11 @@ export function StoriesProvider({
             (story) => story.id !== id,
           ),
         );
-      } catch {
-        setError("Failed to delete story.");
-        throw new Error("Failed to delete story.");
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to delete story.";
+        setError(message);
+        throw new Error(message, { cause: err });
       }
     },
     [],
@@ -147,9 +156,11 @@ export function StoriesProvider({
         if (isMounted) {
           setStories(data);
         }
-      } catch {
+      } catch (err) {
         if (isMounted) {
-          setError("Failed to load stories.");
+          const message =
+            err instanceof Error ? err.message : "Failed to load stories.";
+          setError(message);
         }
       } finally {
         if (isMounted) {

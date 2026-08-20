@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SprintFlowAPI.DTOs.Projects;
-using SprintFlowAPI.Models;
-using SprintFlowAPI.Repositories;
+using SprintFlowAPI.Services;
 
 namespace SprintFlowAPI.Controllers;
 
@@ -10,56 +9,45 @@ namespace SprintFlowAPI.Controllers;
 [Produces("application/json")]
 public class ProjectsController : ControllerBase
 {
-    private readonly IProjectRepository _projectRepository;
-    private readonly ILogger<ProjectsController> _logger;
+    private readonly IProjectService _projectService;
 
-    public ProjectsController(IProjectRepository projectRepository, ILogger<ProjectsController> logger)
+    public ProjectsController(IProjectService projectService)
     {
-        _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
     }
 
     /// <summary>
     /// Gets all projects ordered by creation date descending.
     /// </summary>
-    /// <returns>List of project summaries.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<ProjectResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<ProjectResponse>>> GetAllProjects(CancellationToken cancellationToken)
     {
-        var projects = await _projectRepository.GetAllAsync(cancellationToken);
-
-        var response = projects.Select(MapToResponse);
-        return Ok(response);
+        var projects = await _projectService.GetAllAsync(cancellationToken);
+        return Ok(projects);
     }
 
     /// <summary>
     /// Gets a specific project by its numeric identifier.
     /// </summary>
-    /// <param name="id">Project numeric ID</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Project details if found, otherwise 404.</returns>
     [HttpGet("{id:long}")]
     [ProducesResponseType(typeof(ProjectResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProjectResponse>> GetProjectById(long id, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetByIdAsync(id, cancellationToken);
+        var project = await _projectService.GetByIdAsync(id, cancellationToken);
 
         if (project == null)
         {
             return NotFound(new { message = $"Project with ID '{id}' was not found." });
         }
 
-        return Ok(MapToResponse(project));
+        return Ok(project);
     }
 
     /// <summary>
     /// Creates a new project with auto-generated numeric ID.
     /// </summary>
-    /// <param name="request">Project creation payload</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Created project details and Location header.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ProjectResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -70,14 +58,7 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var project = new Project
-        {
-            Name = request.Name.Trim(),
-            Description = request.Description.Trim()
-        };
-
-        var createdProject = await _projectRepository.CreateAsync(project, cancellationToken);
-        var response = MapToResponse(createdProject);
+        var response = await _projectService.CreateAsync(request, cancellationToken);
 
         return CreatedAtAction(
             nameof(GetProjectById),
@@ -89,22 +70,18 @@ public class ProjectsController : ControllerBase
     /// <summary>
     /// Updates an existing project.
     /// </summary>
-    /// <param name="id">Project numeric ID</param>
-    /// <param name="request">Updated project payload</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>204 No Content if updated, 404 if not found.</returns>
     [HttpPut("{id:long}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateProject(long id, [FromBody] UpdateProjectRequest request, CancellationToken cancellationToken)
     {
-        var updatedProject = await _projectRepository.UpdateAsync(
-            id,
-            request.Name.Trim(),
-            request.Description.Trim(),
-            cancellationToken
-        );
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var updatedProject = await _projectService.UpdateAsync(id, request, cancellationToken);
 
         if (updatedProject == null)
         {
@@ -117,15 +94,12 @@ public class ProjectsController : ControllerBase
     /// <summary>
     /// Deletes a project.
     /// </summary>
-    /// <param name="id">Project numeric ID</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>204 No Content if deleted, 404 if not found.</returns>
     [HttpDelete("{id:long}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProject(long id, CancellationToken cancellationToken)
     {
-        var deleted = await _projectRepository.DeleteAsync(id, cancellationToken);
+        var deleted = await _projectService.DeleteAsync(id, cancellationToken);
 
         if (!deleted)
         {
@@ -133,17 +107,5 @@ public class ProjectsController : ControllerBase
         }
 
         return NoContent();
-    }
-
-    private static ProjectResponse MapToResponse(Project project)
-    {
-        return new ProjectResponse
-        {
-            Id = project.Id,
-            Name = project.Name,
-            Description = project.Description,
-            CreatedAt = project.CreatedAt,
-            UpdatedAt = project.UpdatedAt
-        };
     }
 }

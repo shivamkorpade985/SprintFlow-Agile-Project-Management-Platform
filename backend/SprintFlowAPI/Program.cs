@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using SprintFlowAPI.Data;
+using SprintFlowAPI.Middleware;
 using SprintFlowAPI.Repositories;
 using SprintFlowAPI.Services;
 
@@ -21,28 +22,30 @@ builder.Services.AddDbContext<SprintFlowDbContext>(options =>
     options.UseNpgsql(connectionString);
 });
 
-// Register Project Repository with Scoped lifetime.
+// Register Repositories with Scoped lifetime.
 // Rationale:
-// - ProjectRepository depends on SprintFlowDbContext (which is Scoped).
-// - Services in DI must never have a longer lifetime than their dependencies.
+// - Repositories depend on SprintFlowDbContext (which is Scoped).
+// - Services in DI must never have a longer lifetime than their dependencies (avoiding captive dependencies).
 // - Ensures that operations within a single HTTP request share the same repository and context instance.
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
-
-// Register Story Repository with Scoped lifetime.
-// Same rationale as ProjectRepository — depends on the Scoped DbContext.
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 
-// Register Story Service with Scoped lifetime.
-// - StoryService depends on IStoryRepository (which is Scoped).
-// - Must also be Scoped to avoid a captive dependency lifetime mismatch.
-// - Owns all Story business rules and cross-entity orchestration.
+// Register Application Services with Scoped lifetime.
+// Rationale:
+// - Services represent the application/business logic boundary.
+// - Depend on Scoped repositories and participate in the same Scoped DbContext.
+builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
 // Configure Controllers with JSON enum string serialization.
 // Rationale: by default System.Text.Json serializes C# enums as integers (0, 1, 2...).
-// The frontend expects string literals: "BACKLOG", "IN_PROGRESS", "HIGH", etc.
+// The frontend expects string literals: "BACKLOG", "IN_PROGRESS", "DEVELOPER", "HIGH", etc.
 // JsonStringEnumConverter converts enum values to/from their name strings globally,
-// so Priority="HIGH" and Status="BACKLOG" are correctly round-tripped across the API boundary.
+// so all enum contracts are correctly round-tripped across the API boundary.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -68,6 +71,10 @@ var app = builder.Build();
 // ============================================================================
 // HTTP Request Pipeline Configuration
 // ============================================================================
+
+// Centralized exception handling middleware to catch unhandled unexpected errors,
+// log them, and return a clean HTTP 500 JSON response.
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
