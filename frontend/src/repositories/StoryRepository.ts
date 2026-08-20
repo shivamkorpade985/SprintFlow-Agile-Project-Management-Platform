@@ -1,13 +1,18 @@
-import type { UserStory } from "../types/story";
+/**
+ * StoryRepository Interface
+ *
+ * Persistence abstraction for User Story CRUD operations.
+ */
+import type { UserStory } from "../features/stories/types/story";
 import type {
   CreateStoryRequest,
   UpdateStoryRequest,
-} from "../types/contracts/story";
+} from "../features/stories/types/contracts/story";
 
 export interface StoryRepository {
-  getStories(): Promise<UserStory[]>;
-  getStoryById(id: string): Promise<UserStory | null>;
+  getStoriesByProject(projectId: number): Promise<UserStory[]>;
+  getStoryById(id: number): Promise<UserStory | null>;
   createStory(data: CreateStoryRequest): Promise<UserStory>;
-  updateStory(id: string, data: UpdateStoryRequest): Promise<UserStory>;
-  deleteStory(id: string): Promise<void>;
+  updateStory(id: number, data: UpdateStoryRequest): Promise<UserStory>;
+  deleteStory(id: number): Promise<void>;
 }

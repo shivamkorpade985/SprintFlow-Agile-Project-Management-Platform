@@ -1,13 +1,18 @@
-import type { User } from "../types/user";
+/**
+ * UserRepository Interface
+ *
+ * Contract defining persistence operations for system-level User entities.
+ */
+import type { User } from "../features/team/types/user";
 import type {
   CreateUserRequest,
   UpdateUserRequest,
-} from "../types/contracts/user";
+} from "../features/team/types/contracts/user";
 
 export interface UserRepository {
   getUsers(): Promise<User[]>;
-  getUserById(id: string): Promise<User | null>;
+  getUserById(id: number): Promise<User | null>;
   createUser(data: CreateUserRequest): Promise<User>;
-  updateUser(id: string, data: UpdateUserRequest): Promise<User>;
-  deleteUser(id: string): Promise<void>;
+  updateUser(id: number, data: UpdateUserRequest): Promise<User>;
+  deleteUser(id: number): Promise<void>;
 }

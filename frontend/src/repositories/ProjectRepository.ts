@@ -1,13 +1,18 @@
-import type { Project } from "../types/project";
+/**
+ * ProjectRepository Interface
+ *
+ * Abstract repository contract defining data operations for Project entities.
+ */
+import type { Project } from "../features/projects/types/project";
 import type {
   CreateProjectRequest,
   UpdateProjectRequest,
-} from "../types/contracts/project";
+} from "../features/projects/types/contracts/project";
 
 export interface ProjectRepository {
   getProjects(): Promise<Project[]>;
-  getProjectById(id: string): Promise<Project | null>;
+  getProjectById(id: number): Promise<Project | null>;
   createProject(data: CreateProjectRequest): Promise<Project>;
-  updateProject(id: string, data: UpdateProjectRequest): Promise<Project>;
-  deleteProject(id: string): Promise<void>;
+  updateProject(id: number, data: UpdateProjectRequest): Promise<Project>;
+  deleteProject(id: number): Promise<void>;
 }

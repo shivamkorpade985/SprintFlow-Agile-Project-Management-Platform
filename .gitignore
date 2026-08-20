@@ -1,48 +1,132 @@
-# =========================
-# Frontend - Node / React
-# =========================
+# ============================================================
+# SprintFlow - Full Stack .gitignore
+# React + TypeScript + Vite + ASP.NET Core + EF Core
+# ============================================================
 
-frontend/node_modules/
-frontend/dist/
+
+# ============================================================
+# FRONTEND - Node / React / Vite
+# ============================================================
+
+# Dependencies
+**/node_modules/
+
+# Production / build output
+**/dist/
+**/build/
+**/.vite/
+
+# Vite / frontend environment files
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
 
+# npm / package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# =========================
-# Backend - .NET
-# =========================
-
-backend/bin/
-backend/obj/
-backend/.vs/
-backend/.vscode/
+# Optional package-manager caches
+.pnpm-store/
 
 
-# =========================
-# Environment / Secrets
-# =========================
+# ============================================================
+# BACKEND - .NET / ASP.NET Core
+# ============================================================
 
+# Build output
+**/bin/
+**/obj/
+
+# Visual Studio generated files
+.vs/
+
+# User-specific Visual Studio files
+*.user
+*.userosscache
+*.suo
+
+# Visual Studio solution state
+*.sln.docstates
+
+# Test / coverage output
+**/TestResults/
+**/coverage/
+
+
+# ============================================================
+# ENVIRONMENT VARIABLES / SECRETS
+# ============================================================
+
+# Root environment files
 .env
 .env.*
 !.env.example
 
+# Additional local environment variants
+*.local.env
 
-# =========================
-# IDE / Editor
-# =========================
 
+# ============================================================
+# IDE / EDITOR
+# ============================================================
+
+# VS Code
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# JetBrains Rider / IntelliJ
 .idea/
 
+# Cursor
+.cursor/
 
-# =========================
-# OS Generated Files
-# =========================
+
+# ============================================================
+# OPERATING SYSTEM FILES
+# ============================================================
 
 .DS_Store
+.DS_Store?
+._*
+
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+
 Desktop.ini
+
+
+# ============================================================
+# TEMPORARY / BACKUP FILES
+# ============================================================
+
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS/editor temporary files
+*.orig
+
+
+# ============================================================
+# DATABASE / LOCAL DEVELOPMENT
+# ============================================================
+
+# Local SQLite databases, if ever used
+*.db
+*.db-shm
+*.db-wal
+
+
+# ============================================================
+# LOCAL LOG FILES
+# ============================================================
+
+*.log
+logs/

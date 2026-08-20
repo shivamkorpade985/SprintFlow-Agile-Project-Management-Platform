@@ -1,4 +1,4 @@
-import { LocalStorageProjectRepository } from "../../repositories/local/LocalStorageProjectRepository";
+import { ApiProjectRepository } from "../../repositories/api/ApiProjectRepository";
 
 export const projectRepository =
-  new LocalStorageProjectRepository();
+  new ApiProjectRepository();

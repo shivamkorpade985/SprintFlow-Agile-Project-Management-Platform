@@ -1,6 +1,15 @@
+/**
+ * ProjectsProvider
+ *
+ * Global Context Provider owning the workspace-level projects collection.
+ */
 import { useCallback, useEffect, useState } from "react";
-import type { Project } from "../../../types/project";
-import type { CreateProjectRequest } from "../../../types/contracts/project";
+import type { Project } from "../types/project";
+import type {
+  CreateProjectRequest,
+  UpdateProjectRequest,
+} from "../types/contracts/project";
+
 import { projectRepository } from "../projectRepository";
 import { ProjectsContext } from "./projectsContext";
 
@@ -31,26 +40,70 @@ export function ProjectsProvider({
   }, []);
 
   const createProject = useCallback(
-  async (data: CreateProjectRequest): Promise<Project> => {
-    try {
-      setError(null);
+    async (data: CreateProjectRequest): Promise<Project> => {
+      try {
+        setError(null);
 
-      const createdProject =
-        await projectRepository.createProject(data);
+        const createdProject =
+          await projectRepository.createProject(data);
 
-      setProjects((currentProjects) => [
-        ...currentProjects,
-        createdProject,
-      ]);
+        setProjects((currentProjects) => [
+          ...currentProjects,
+          createdProject,
+        ]);
 
-      return createdProject;
-    } catch {
-      setError("Failed to create project.");
-      throw new Error("Failed to create project.");
-    }
-  },
-  [],
-);
+        return createdProject;
+      } catch {
+        setError("Failed to create project.");
+        throw new Error("Failed to create project.");
+      }
+    },
+    [],
+  );
+
+  const updateProject = useCallback(
+    async (
+      id: number,
+      data: UpdateProjectRequest,
+    ): Promise<Project> => {
+      try {
+        setError(null);
+
+        const updatedProject =
+          await projectRepository.updateProject(id, data);
+
+        setProjects((currentProjects) =>
+          currentProjects.map((project) =>
+            project.id === id ? updatedProject : project,
+          ),
+        );
+
+        return updatedProject;
+      } catch {
+        setError("Failed to update project.");
+        throw new Error("Failed to update project.");
+      }
+    },
+    [],
+  );
+
+  const deleteProject = useCallback(
+    async (id: number): Promise<void> => {
+      try {
+        setError(null);
+
+        await projectRepository.deleteProject(id);
+
+        setProjects((currentProjects) =>
+          currentProjects.filter((project) => project.id !== id),
+        );
+      } catch {
+        setError("Failed to delete project.");
+        throw new Error("Failed to delete project.");
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -88,7 +141,9 @@ export function ProjectsProvider({
         error,
         refreshProjects,
         createProject,
-}}
+        updateProject,
+        deleteProject,
+      }}
     >
       {children}
     </ProjectsContext.Provider>
